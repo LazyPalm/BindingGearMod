@@ -34,6 +34,8 @@ int keyCodeRightAlt = 184
 int keyCodeLeftShift = 42
 int keyCodeRightShift = 54
 
+;adding a note - testing github
+
 event OnConfigOpen()
 
     thePlayer = Game.GetPlayer()
@@ -471,7 +473,7 @@ function LearnWornGear()
 		Form item = inventory[idx]
         int currentlyInSlot = StorageUtil.GetIntValue(item, "binding_gear_slot_" + selectedSlot, 0)
         if thePlayer.IsEquipped(item)
-            if item.HasKeyword(main.zlib.zad_Lockable)
+            if item.HasKeyword(main.zlib.zad_Lockable) || item.HasKeyword(main.zlib.zad_InventoryDevice)
                 bndg_BindingGearManager.WriteToConsole("Item " + item.GetName() + " is a devious device")
             else
                 StorageUtil.SetIntValue(item, "binding_gear_slot_" + selectedSlot, 1)
