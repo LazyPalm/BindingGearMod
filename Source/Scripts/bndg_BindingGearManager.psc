@@ -248,8 +248,10 @@ function ChangeGear()
                 Form item = items[idx]
                 if item
                     WriteToConsole("adding item: " + item)
-                    if !thePlayer.IsEquipped(item)
-                        thePlayer.EquipItem(item, false, true)
+                    if thePlayer.GetItemCount(item) > 0
+                        if !thePlayer.IsEquipped(item)
+                            thePlayer.EquipItem(item, false, true)
+                        endif
                     endif
                     ; equip = true
                     ; if wearningDdItems
@@ -278,7 +280,7 @@ function ChangeGear()
             idx = 0
             while idx < inventory.Length
                 Form item = inventory[idx]
-                if thePlayer.IsEquipped(item)
+                if thePlayer.IsEquipped(item) && item.IsPlayable()
                     if item.HasKeyword(zlib.zad_Lockable) || item.HasKeyword(zlib.zad_InventoryDevice)
                         bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
                     else
