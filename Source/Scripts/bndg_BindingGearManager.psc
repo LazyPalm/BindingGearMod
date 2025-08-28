@@ -263,6 +263,7 @@ function ChangeGear()
                     if thePlayer.GetItemCount(item) > 0
                         if !thePlayer.IsEquipped(item)
                             thePlayer.EquipItem(item, false, true)
+                            Utility.Wait(0.25)
                         endif
                     endif
                     ; equip = true
@@ -305,6 +306,7 @@ function ChangeGear()
                                 playedAnimiation = true
                             endif
                             thePlayer.UnequipItem(item, false, true)
+                            Utility.Wait(0.25)
                         endif
                     endif
                 endif
