@@ -46,11 +46,11 @@ event OnInit()
 endevent
 
 event OnKeyUp(Int KeyCode, Float HoldTime)	
-	;ProcessKey(KeyCode, HoldTime)
+	ProcessKey(KeyCode, HoldTime)
 endevent
 
 event OnKeyDown(int KeyCode)
-    ProcessKey(KeyCode, 0.0)
+    ;ProcessKey(KeyCode, 0.0)
 endevent
 
 function GameLoaded()
