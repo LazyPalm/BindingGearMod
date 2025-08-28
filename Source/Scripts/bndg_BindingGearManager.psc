@@ -119,7 +119,17 @@ function WriteToConsole(string msg) global
     Debug.Trace("[BNDG]: " + msg)
 endfunction
 
+state ProcessingKeyState
+
+    function ProcessKey(int keyCode, float holdTime)  
+        bndg_BindingGearManager.WriteToConsole("ProcessKey - in ProcessingKeyState")
+    endfunction
+
+endstate
+
 function ProcessKey(int keyCode, float holdTime)   
+
+    GoToState("ProcessingKeyState")
 
     bool bLeftControPressed = Input.IsKeyPressed(keyCodeLeftControl)
     bool bRightControlPressed = Input.IsKeyPressed(keyCodeRightControl)
@@ -153,6 +163,8 @@ function ProcessKey(int keyCode, float holdTime)
         endif
         processInput = false
     endif
+
+    GoToState("")
 
 endfunction
 
