@@ -175,7 +175,7 @@ function DisplaySlot(int slot)
     int equippedCount = 0
     while idx < inventory.Length
         Form item = inventory[idx]
-        if thePlayer.IsEquipped(item)
+        if thePlayer.IsEquipped(item) && item.IsPlayable()
             equippedCount += 1
             ;bndg_BindingGearManager.WriteToConsole("equipped item: " + item)
             toggleLearnItem[idx] = AddTextOption(items[idx].GetName(), "")
@@ -472,7 +472,7 @@ function LearnWornGear()
 	while idx < inventory.Length
 		Form item = inventory[idx]
         int currentlyInSlot = StorageUtil.GetIntValue(item, "binding_gear_slot_" + selectedSlot, 0)
-        if thePlayer.IsEquipped(item)
+        if thePlayer.IsEquipped(item) && item.IsPlayable()
             if item.HasKeyword(main.zlib.zad_Lockable) || item.HasKeyword(main.zlib.zad_InventoryDevice)
                 bndg_BindingGearManager.WriteToConsole("Item " + item.GetName() + " is a devious device")
             else
