@@ -31,6 +31,8 @@ int keyCodeRightAlt = 184
 int keyCodeLeftShift = 42
 int keyCodeRightShift = 54
 
+int modiferKeyCurrentlyPressed = 0
+
 event OnInit()
 
     ;defaults
@@ -45,16 +47,68 @@ event OnInit()
 
 endevent
 
+bool working = false
+
 event OnKeyUp(Int KeyCode, Float HoldTime)	
-	ProcessKey(KeyCode, HoldTime)
+
+    if keyCode == keyCodeLeftControl || keyCode == keyCodeRightControl || keyCode == keyCodeLeftAlt || keyCode == keyCodeRightAlt || keyCode == keyCodeLeftShift || keyCode == keyCodeRightShift
+        modiferKeyCurrentlyPressed = 0    
+    endif
+
+    if !working
+        working = true
+	    ProcessKeyUp(KeyCode, HoldTime)
+        working = False
+    else 
+        ;debug.Notification("busy....")
+    endif
+
 endevent
 
 event OnKeyDown(int KeyCode)
+
+    If keyCode == keyCodeLeftControl
+        bndg_BindingGearManager.WriteToConsole("keyCodeLeftControl pressed...")
+        modiferKeyCurrentlyPressed = keyCodeLeftControl
+    ElseIf keyCode == keyCodeRightControl
+        bndg_BindingGearManager.WriteToConsole("keyCodeRightControl pressed...")
+        modiferKeyCurrentlyPressed = keyCodeRightControl
+    ElseIf keyCode == keyCodeLeftAlt
+        bndg_BindingGearManager.WriteToConsole("keyCodeLeftAlt pressed...")
+        modiferKeyCurrentlyPressed = keyCodeLeftAlt
+    ElseIf keyCode == keyCodeRightAlt
+        bndg_BindingGearManager.WriteToConsole("keyCodeRightAlt pressed...")
+        modiferKeyCurrentlyPressed = keyCodeRightAlt
+    ElseIf keyCode == keyCodeLeftShift
+        bndg_BindingGearManager.WriteToConsole("keyCodeLeftShift pressed...")
+        modiferKeyCurrentlyPressed = keyCodeLeftShift
+    ElseIf keyCode == keyCodeRightShift
+        bndg_BindingGearManager.WriteToConsole("keyCodeRightShift pressed...")
+        modiferKeyCurrentlyPressed = keyCodeRightShift 
+    
+    endif
+
     ;ProcessKey(KeyCode, 0.0)
 endevent
 
 function GameLoaded()
     gender = thePlayer.GetLeveledActorBase().GetSex()
+    gearsData.GameLoaded()
+
+    UnregisterForKey(keyCodeLeftControl)
+    UnregisterForKey(keyCodeRightControl)
+    UnregisterForKey(keyCodeLeftAlt)
+    UnregisterForKey(keyCodeRightAlt)
+    UnregisterForKey(keyCodeLeftShift)
+    UnregisterForKey(keyCodeRightShift)
+
+    RegisterForKey(keyCodeLeftControl)
+    RegisterForKey(keyCodeRightControl)
+    RegisterForKey(keyCodeLeftAlt)
+    RegisterForKey(keyCodeRightAlt)
+    RegisterForKey(keyCodeLeftShift)
+    RegisterForKey(keyCodeRightShift)
+
     ;debug.MessageBox("gear loaded: " + gender)
 endfunction
 
@@ -119,57 +173,76 @@ function WriteToConsole(string msg) global
     Debug.Trace("[BNDG]: " + msg)
 endfunction
 
-state ProcessingKeyState
+; state ProcessingKeyState
 
-    function ProcessKey(int keyCode, float holdTime)  
-        bndg_BindingGearManager.WriteToConsole("ProcessKey - in ProcessingKeyState")
-    endfunction
+;     function ProcessKeyUp(int keyCode, float holdTime)  
+;         bndg_BindingGearManager.WriteToConsole("ProcessKey - in ProcessingKeyState")
+;         debug.Notification("ProcessKey - in ProcessingKeyState")
+;     endfunction
 
-endstate
+; endstate
 
-function ProcessKey(int keyCode, float holdTime)   
+function ProcessKeyUp(int keyCode, float holdTime)   
 
-    GoToState("ProcessingKeyState")
-
-    bool bLeftControPressed = Input.IsKeyPressed(keyCodeLeftControl)
-    bool bRightControlPressed = Input.IsKeyPressed(keyCodeRightControl)
-    bool bLeftAltPressed = Input.IsKeyPressed(keyCodeLeftAlt)
-    bool bRightAltPressed = Input.IsKeyPressed(keyCodeRightAlt)
-    bool bLeftShiftPressed = Input.IsKeyPressed(keyCodeLeftShift)
-    bool bRightShiftPressed = Input.IsKeyPressed(keyCodeRightShift)
-    bool modifiersPressed = (bLeftControPressed || bRightControlPressed || bLeftAltPressed || bRightAltPressed || bLeftShiftPressed || bRightShiftPressed)
-
-    bndg_BindingGearManager.WriteToConsole("ProcessKey - In no state - keycode: " + keyCode + " modifiers: " + modifiersPressed)
-    ;bndg_BindingGearManager.WriteToConsole("ProcessInput keyCode: " + keyCode)
-    if !processInput && !changingGear && SafeProcess()
-        processInput = true
-        if (keyCode == wheelMenuHotkey && Input.IsKeyPressed(wheelMenuModifier)) || (keyCode == wheelMenuHotkey && wheelMenuModifier == 0 && !modifiersPressed)
-            ShowWheelMenu()
-        else
-            idx = 1
-            while idx <= bndg_BindingGearManager.GetSlotCount()
-                if keyCode == hotkeys[idx]
-                    if ((modifierKeys[idx] == 0 && !modifiersPressed) || Input.IsKeyPressed(modifierKeys[idx]))
-                        bndg_BindingGearManager.WriteToConsole("use slot: " + idx)
-                        if !changingGear
-                            changeToSlot = idx
-                            changingGear = true
-                            ChangeGear()
-                        endif
-                    endif
-                endif
-                idx += 1
-            endwhile
+    int i = 1
+    while i <= 8
+        if keyCode == hotkeys[i] && ((modifierKeys[i] == 0 && modiferKeyCurrentlyPressed == 0) || (modifierKeys[i] == modiferKeyCurrentlyPressed))
+            StartGearChange(i)
+            i = 100 ;break
         endif
-        processInput = false
-    endif
+        i += 1
+    endwhile
 
-    GoToState("")
+    if keyCode == wheelMenuHotkey && ((wheelMenuModifier == 0 && modiferKeyCurrentlyPressed == 0) || (wheelMenuModifier == modiferKeyCurrentlyPressed))
+        ShowWheelMenu()
+    endif
 
 endfunction
 
+; function ProcessKeyRETIRED(int keyCode, float holdTime)   
+
+;     GoToState("ProcessingKeyState")
+
+;     bool bLeftControPressed = Input.IsKeyPressed(keyCodeLeftControl)
+;     bool bRightControlPressed = Input.IsKeyPressed(keyCodeRightControl)
+;     bool bLeftAltPressed = Input.IsKeyPressed(keyCodeLeftAlt)
+;     bool bRightAltPressed = Input.IsKeyPressed(keyCodeRightAlt)
+;     bool bLeftShiftPressed = Input.IsKeyPressed(keyCodeLeftShift)
+;     bool bRightShiftPressed = Input.IsKeyPressed(keyCodeRightShift)
+;     bool modifiersPressed = (bLeftControPressed || bRightControlPressed || bLeftAltPressed || bRightAltPressed || bLeftShiftPressed || bRightShiftPressed)
+
+;     bndg_BindingGearManager.WriteToConsole("ProcessKey - In no state - keycode: " + keyCode + " modifiers: " + modifiersPressed)
+;     ;bndg_BindingGearManager.WriteToConsole("ProcessInput keyCode: " + keyCode)
+;     if !processInput && !changingGear && SafeProcess()
+;         processInput = true
+;         if (keyCode == wheelMenuHotkey && Input.IsKeyPressed(wheelMenuModifier)) || (keyCode == wheelMenuHotkey && wheelMenuModifier == 0 && !modifiersPressed)
+;             ShowWheelMenu()
+;         else
+;             idx = 1
+;             while idx <= bndg_BindingGearManager.GetSlotCount()
+;                 if keyCode == hotkeys[idx]
+;                     if ((modifierKeys[idx] == 0 && !modifiersPressed) || Input.IsKeyPressed(modifierKeys[idx]))
+;                         bndg_BindingGearManager.WriteToConsole("use slot: " + idx)
+;                         if !changingGear
+;                             changeToSlot = idx
+;                             debug.MessageBox("in keypress")
+;                             changingGear = true                            
+;                             ChangeGear()
+;                         endif
+;                     endif
+;                 endif
+;                 idx += 1
+;             endwhile
+;         endif
+;         processInput = false
+;     endif
+
+;     GoToState("")
+
+; endfunction
+
 state DhlpState
-    function ProcessKey(int keyCode, float holdTime)
+    function ProcessKeyUp(int keyCode, float holdTime)
 
         ;TODO - this needs to looks for the hotkey and modifiers - goes off on any key now
 
@@ -179,46 +252,87 @@ state DhlpState
     endfunction
 endstate
 
+bool showingWheel = false
+
 function ShowWheelMenu()
 
-    bndg_BindingGearManager.WriteToConsole("Displaying wheel menu")
+    if !showingWheel
+        showingWheel = true
 
-    UIWheelMenu actionMenu = UIExtensions.GetMenu("UIWheelMenu") as UIWheelMenu
-    idx = 0
-    while idx < bndg_BindingGearManager.GetSlotCount()
-        Form[] items = StorageUtil.FormListToArray(thePlayer, "binding_gear_items_" + (idx + 1))
-        string slotName = StorageUtil.GetStringValue(thePlayer, "binding_gear_slot_name_" + (idx + 1), "")
-        bool enabled = true
-        if (items.Length == 0 && slotName == "")
-            enabled = false 
-        endif
-        if slotName == ""
-            slotName = "Set " + (idx + 1)
-        endif
-        if !enabled
-            slotName = ""
-        endif
-        actionMenu.SetPropertyIndexString("optionText", idx, slotName)
-        actionMenu.SetPropertyIndexString("optionLabelText", idx, slotName)
-        actionMenu.SetPropertyIndexBool("optionEnabled", idx, enabled)
-        idx += 1
-    endwhile
+        bndg_BindingGearManager.WriteToConsole("Displaying wheel menu")
 
-    int actionResult = actionMenu.OpenMenu()
+        UIWheelMenu actionMenu = UIExtensions.GetMenu("UIWheelMenu") as UIWheelMenu
+        idx = 0
+        while idx < bndg_BindingGearManager.GetSlotCount()
+            int itemCount = JsonUtil.FormListCount(gearsData.JsonFileName, "binding_gear_items_" + (idx + 1))
+            string slotName = JsonUtil.GetStringValue(gearsData.JsonFileName, "binding_gear_slot_name_" + (idx + 1), "")
+            bool enabled = true
+            if (itemCount == 0 && slotName == "")
+                enabled = false 
+            endif
+            if slotName == ""
+                slotName = "Set " + (idx + 1)
+            endif
+            if !enabled
+                slotName = ""
+            endif
+            actionMenu.SetPropertyIndexString("optionText", idx, slotName)
+            actionMenu.SetPropertyIndexString("optionLabelText", idx, slotName)
+            actionMenu.SetPropertyIndexBool("optionEnabled", idx, enabled)
+            idx += 1
+        endwhile
 
-    idx = 0
-    while idx < bndg_BindingGearManager.GetSlotCount()
-        if actionResult == idx
-            changeToSlot = idx + 1
-            changingGear = true
-            ChangeGear()
+        int actionResult = actionMenu.OpenMenu()
+
+        if actionResult >= 0 && actionResult <= bndg_BindingGearManager.GetSlotCount()
+            StartGearChange(actionResult + 1)
         endif
-        idx += 1
-    endwhile
+
+        ; idx = 0
+        ; while idx < bndg_BindingGearManager.GetSlotCount()
+        ;     if actionResult == idx
+        ;         changeToSlot = idx + 1
+        ;         if !changingGear
+        ;             changingGear = true
+        ;             ;debug.MessageBox("in wheel")
+        ;             ChangeGear()
+
+        ;         endif
+        ;     endif
+        ;     idx += 1
+        ; endwhile
+
+        showingWheel = false
+    endif
 
 endfunction
 
+bool changeGearWorking = false
+
+function StartGearChange(int slot)
+    changeToSlot = slot
+    ChangeGear()
+endfunction
+
 function ChangeGear()
+
+    if changeGearWorking
+        debug.MessageBox("already working...")
+        return
+    endif
+
+    changeGearWorking = true
+
+    ;thePlayer.SheatheWeapon()
+
+    if thePlayer.IsWeaponDrawn()
+        Input.TapKey(19)
+        Utility.Wait(1.0)
+    endif
+
+    ;debug.Notification("change gear")
+
+    bndg_BindingGearManager.WriteToConsole("change gear to set: " + changeToSlot)
 
     bool equip
 
@@ -233,7 +347,7 @@ function ChangeGear()
 
     else
 
-        string slotName = StorageUtil.GetStringValue(thePlayer, "binding_gear_slot_name_" + changeToSlot, "")
+        string slotName = JsonUtil.GetStringValue(gearsData.JsonFileName, "binding_gear_slot_name_" + changeToSlot, "")
         if slotName != ""
             slotName = " (" + slotName + ")"
         endif
@@ -243,25 +357,35 @@ function ChangeGear()
         ; bool wearningDdItems = thePlayer.WornHasKeyword(zlib.zad_Lockable)
         ; bndg_BindingGearManager.WriteToConsole("wearning dd items: " + wearningDdItems)
 
-        Form[] items = StorageUtil.FormListToArray(thePlayer, "binding_gear_items_" + changeToSlot)
-        WriteToConsole("items to add: " + items)
+        ;Form[] items = StorageUtil.FormListToArray(thePlayer, "binding_gear_items_" + changeToSlot)
 
+        Form[] items = JsonUtil.FormListToArray(gearsData.JsonFileName, "binding_gear_items_" + changeToSlot)
+
+        WriteToConsole("items to add: " + items)
+ 
         bool playedAnimiation = false
 
         if items.Length > 0
 
-            if useAnimation == 1
-                Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
-                playedAnimiation = true
-            endif
-
             idx = 0
             while idx < items.Length
                 Form item = items[idx]
-                if item
+
+                ;WriteToConsole("add test - item: " + item.GetName() + " total: " + items.Length + " idx: " + idx)
+
+                if item != none
                     WriteToConsole("adding item: " + item)
                     if thePlayer.GetItemCount(item) > 0
-                        if !thePlayer.IsEquipped(item)
+                        if !thePlayer.IsEquipped(item) && item.IsPlayable()
+
+                            if useAnimation == 1 && !playedAnimiation
+                                if item.HasKeywordString("ArmorCuirass") || item.HasKeywordString("ClothingBody")
+                                    Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
+                                    playedAnimiation = true
+                                endif
+                            endif
+
+                            StorageUtil.SetIntValue(item, "binding_gear_added_set", changeToSlot)
                             thePlayer.EquipItem(item, false, true)
                             Utility.Wait(0.05)
                         endif
@@ -282,42 +406,113 @@ function ChangeGear()
                     ;     thePlayer.EquipItem(item, false, true)
                     ; endif
                 endif
-                idx += 1
+                idx = idx + 1
             endwhile
         endif
 
-        int leavesItems = StorageUtil.GetIntValue(thePlayer, "binding_gear_slot_leaves_items_" + changeToSlot, 0)
+        int leavesItems = JsonUtil.GetIntValue(gearsData.JsonFileName, "binding_gear_slot_leaves_items_" + changeToSlot, 0)
 
         if leavesItems == 0
-            Form[] inventory = thePlayer.GetContainerForms()
+
+            Form[] inventory = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey())
             idx = 0
             while idx < inventory.Length
                 Form item = inventory[idx]
-                if thePlayer.IsEquipped(item) && item.IsPlayable()
-                    if item.HasKeyword(zlib.zad_Lockable) || item.HasKeyword(zlib.zad_InventoryDevice)
-                        bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
-                    else
-                        int addSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + changeToSlot, 0)
-                        int removeSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + usingSlot, 0)
-                        bndg_BindingGearManager.WriteToConsole("cleanup inventory - item: " + item.GetName() + " addSet: " + addSet + " removeSet: " + removeSet)
-                        if (removeSet == 1 && addSet == 0) || (removeSet == 0 && addSet == 0)
-                            if !playedAnimiation && useAnimation == 1
+                if item.HasKeyword(zlib.zad_Lockable) || item.HasKeyword(zlib.zad_InventoryDevice)
+                    bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
+                else
+                    int addedBy = StorageUtil.GetIntValue(item, "binding_gear_added_set", 0)
+                    if addedBy != changeToSlot
+                        if useAnimation == 1 && !playedAnimiation
+                            if item.HasKeywordString("ArmorCuirass") || item.HasKeywordString("ClothingBody")
                                 Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
                                 playedAnimiation = true
                             endif
-                            thePlayer.UnequipItem(item, false, true)
-                            Utility.Wait(0.05)
                         endif
+                        thePlayer.UnequipItem(item, false, true)
+                        Utility.Wait(0.05)
                     endif
+                    ; int addSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + changeToSlot, 0)
+                    ; int removeSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + usingSlot, 0)
+                    ; bndg_BindingGearManager.WriteToConsole("cleanup inventory - item: " + item.GetName() + " addSet: " + addSet + " removeSet: " + removeSet)
+                    ; if (removeSet == 1 && addSet == 0) || (removeSet == 0 && addSet == 0)
+                    ;     if !playedAnimiation && useAnimation == 1
+                    ;         Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
+                    ;         playedAnimiation = true
+                    ;     endif
+                    ;     thePlayer.UnequipItem(item, false, true)
+                    ;     Utility.Wait(0.05)
+                    ; endif
+                endif
+
+                idx += 1
+            endwhile
+
+            ;array cleanup code - this should not happen, but will keep the array not clean if it does
+            inventory = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey())
+            idx = 0
+            while idx < inventory.Length
+                Form item = inventory[idx]
+                if !thePlayer.IsEquipped(item)
+                    StorageUtil.FormListRemove(thePlayer, bndg_Data.WornItemsStorageKey(), item)
+                    ;debug.Notification("cleaning up: " + item)
+                    bndg_BindingGearManager.WriteToConsole("worn items storage - cleaning up: " + item)
                 endif
                 idx += 1
             endwhile
+
+            ; Form[] inventory = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey())
+            ; idx = 0
+            ; while idx < inventory.Length
+            ;     Form item = inventory[idx]
+            ;     if item.HasKeyword(zlib.zad_Lockable) || item.HasKeyword(zlib.zad_InventoryDevice)
+            ;         bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
+            ;     else
+            ;         int addSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + changeToSlot, 0)
+            ;         int removeSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + usingSlot, 0)
+            ;         bndg_BindingGearManager.WriteToConsole("cleanup inventory - item: " + item.GetName() + " addSet: " + addSet + " removeSet: " + removeSet)
+            ;         if (removeSet == 1 && addSet == 0) || (removeSet == 0 && addSet == 0)
+            ;             if !playedAnimiation && useAnimation == 1
+            ;                 Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
+            ;                 playedAnimiation = true
+            ;             endif
+            ;             thePlayer.UnequipItem(item, false, true)
+            ;             Utility.Wait(0.05)
+            ;         endif
+            ;     endif
+            ;     idx += 1
+            ; endwhile
+
+
+            ; Form[] inventory = thePlayer.GetContainerForms()
+            ; idx = 0
+            ; while idx < inventory.Length
+            ;     Form item = inventory[idx]
+            ;     if thePlayer.IsEquipped(item) && item.IsPlayable()
+            ;         if item.HasKeyword(zlib.zad_Lockable) || item.HasKeyword(zlib.zad_InventoryDevice)
+            ;             bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
+            ;         else
+            ;             int addSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + changeToSlot, 0)
+            ;             int removeSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + usingSlot, 0)
+            ;             bndg_BindingGearManager.WriteToConsole("cleanup inventory - item: " + item.GetName() + " addSet: " + addSet + " removeSet: " + removeSet)
+            ;             if (removeSet == 1 && addSet == 0) || (removeSet == 0 && addSet == 0)
+            ;                 if !playedAnimiation && useAnimation == 1
+            ;                     Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
+            ;                     playedAnimiation = true
+            ;                 endif
+            ;                 thePlayer.UnequipItem(item, false, true)
+            ;                 Utility.Wait(0.05)
+            ;             endif
+            ;         endif
+            ;     endif
+            ;     idx += 1
+            ; endwhile
         endif
 
-        Form leftHandSpell = StorageUtil.GetFormValue(thePlayer, "binding_gear_spell_left_" + changeToSlot)
-        Form rightHandSpell = StorageUtil.GetFormValue(thePlayer, "binding_gear_spell_right_" + changeToSlot)
-        Form shoutSpell = StorageUtil.GetFormValue(thePlayer, "binding_gear_shout_" + changeToSlot)
-        Form otherSpell = StorageUtil.GetFormValue(thePlayer, "binding_gear_spell_other_" + changeToSlot)
+        Form leftHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + changeToSlot)
+        Form rightHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + changeToSlot)
+        Form shoutSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + changeToSlot)
+        Form otherSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + changeToSlot)
 
         if doNotUnequipSpells == 0
             Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
@@ -364,6 +559,8 @@ function ChangeGear()
 
     changingGear = false
 
+    changeGearWorking = false
+
     ;endif
 
 endfunction
@@ -401,3 +598,5 @@ bool Function SafeProcess()
 EndFunction
 
 zadLibs property zlib auto
+
+bndg_Data property gearsData auto
