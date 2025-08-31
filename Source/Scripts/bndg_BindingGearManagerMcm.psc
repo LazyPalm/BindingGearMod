@@ -494,7 +494,8 @@ function LearnWornGear()
                 bndg_BindingGearManager.WriteToConsole("Item " + item.GetName() + " is a devious device")
             else
                 if item.IsPlayable()
-                    JsonUtil.FormListAdd(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, item, false)
+                    JsonUtil.IntListAdd(gearsData.JsonFileName, "binding_gear_item_refs_" + selectedSlot, StorageUtil.GetIntValue(item, "gear_guid", 0), true)
+                    JsonUtil.FormListAdd(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, item, true)
                 endif
             endif
         endif

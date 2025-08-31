@@ -109,6 +109,8 @@ function GameLoaded()
     RegisterForKey(keyCodeLeftShift)
     RegisterForKey(keyCodeRightShift)
 
+    modiferKeyCurrentlyPressed = 0
+
     ;debug.MessageBox("gear loaded: " + gender)
 endfunction
 
@@ -422,6 +424,7 @@ function ChangeGear()
                     bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
                 else
                     int addedBy = StorageUtil.GetIntValue(item, "binding_gear_added_set", 0)
+                    ;ebug.MessageBox("item: " + item.GetName() + " added: " + addedBy)
                     if addedBy != changeToSlot
                         if useAnimation == 1 && !playedAnimiation
                             if item.HasKeywordString("ArmorCuirass") || item.HasKeywordString("ClothingBody")
