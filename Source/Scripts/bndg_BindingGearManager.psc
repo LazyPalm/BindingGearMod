@@ -387,7 +387,7 @@ function ChangeGear()
                                 endif
                             endif
 
-                            StorageUtil.SetIntValue(item, "binding_gear_added_set", changeToSlot)
+                            ;StorageUtil.SetIntValue(item, "binding_gear_added_set", changeToSlot)
                             thePlayer.EquipItem(item, false, true)
                             Utility.Wait(0.05)
                         endif
@@ -423,9 +423,8 @@ function ChangeGear()
                 if item.HasKeyword(zlib.zad_Lockable) || item.HasKeyword(zlib.zad_InventoryDevice)
                     bndg_BindingGearManager.WriteToConsole(item.GetName() + " is a devious item and can't be removed")
                 else
-                    int addedBy = StorageUtil.GetIntValue(item, "binding_gear_added_set", 0)
-                    ;ebug.MessageBox("item: " + item.GetName() + " added: " + addedBy)
-                    if addedBy != changeToSlot
+
+                    if !JsonUtil.FormListHas(gearsData.JsonFileName, "binding_gear_items_" + changeToSlot, item)
                         if useAnimation == 1 && !playedAnimiation
                             if item.HasKeywordString("ArmorCuirass") || item.HasKeywordString("ClothingBody")
                                 Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
@@ -435,6 +434,19 @@ function ChangeGear()
                         thePlayer.UnequipItem(item, false, true)
                         Utility.Wait(0.05)
                     endif
+
+                    ; int addedBy = StorageUtil.GetIntValue(item, "binding_gear_added_set", 0)
+                    ; ;ebug.MessageBox("item: " + item.GetName() + " added: " + addedBy)
+                    ; if addedBy != changeToSlot
+                    ;     if useAnimation == 1 && !playedAnimiation
+                    ;         if item.HasKeywordString("ArmorCuirass") || item.HasKeywordString("ClothingBody")
+                    ;             Debug.SendAnimationEvent(thePlayer, "Arrok_Undress_G" + gender)
+                    ;             playedAnimiation = true
+                    ;         endif
+                    ;     endif
+                    ;     thePlayer.UnequipItem(item, false, true)
+                    ;     Utility.Wait(0.05)
+                    ; endif
                     ; int addSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + changeToSlot, 0)
                     ; int removeSet = StorageUtil.GetIntValue(item, "binding_gear_slot_" + usingSlot, 0)
                     ; bndg_BindingGearManager.WriteToConsole("cleanup inventory - item: " + item.GetName() + " addSet: " + addSet + " removeSet: " + removeSet)
