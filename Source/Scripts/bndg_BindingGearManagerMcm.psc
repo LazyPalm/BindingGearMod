@@ -1,5 +1,7 @@
 Scriptname bndg_BindingGearManagerMcm extends SKI_ConfigBase
 
+string version
+
 Actor thePlayer
 
 int selectedSlot
@@ -57,6 +59,8 @@ endevent
 
 event OnPageReset(string page)
 
+    version = "0.61"
+
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)
 
@@ -80,6 +84,8 @@ event OnPageReset(string page)
 endevent
 
 function DisplayWelcome()
+
+    AddTextOption("Version", version)
 
 endfunction
 

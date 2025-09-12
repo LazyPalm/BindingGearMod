@@ -249,7 +249,7 @@ state DhlpState
         ;TODO - this needs to looks for the hotkey and modifiers - goes off on any key now
 
         ;debug.Notification("<font color='#ff0000'>Gear changes suspended with DHLP event running.</font>")
-        ;bndg_BindingGearManager.WriteToConsole("ProcessKey - In DHLP suspended state")
+        bndg_BindingGearManager.WriteToConsole("ProcessKey - In DHLP suspended state")
 
     endfunction
 endstate
@@ -360,6 +360,50 @@ function ChangeGear()
         ; bndg_BindingGearManager.WriteToConsole("wearning dd items: " + wearningDdItems)
 
         ;Form[] items = StorageUtil.FormListToArray(thePlayer, "binding_gear_items_" + changeToSlot)
+
+        Form leftHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + changeToSlot)
+        Form rightHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + changeToSlot)
+        Form shoutSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + changeToSlot)
+        Form otherSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + changeToSlot)
+
+        if doNotUnequipSpells == 0
+            Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
+            Spell eqSpellRight = thePlayer.GetEquippedSpell(1)
+            Shout eqShout = thePlayer.GetEquippedShout()
+            Spell eqOtherSpell = thePlayer.GetEquippedSpell(2)
+
+            if eqSpellLeft
+                thePlayer.UnequipSpell(eqSpellLeft, 0)
+            endif
+
+            if eqSpellRight
+                thePlayer.UnequipSpell(eqSpellRight, 1)
+            endif
+
+            if eqShout
+                thePlayer.UnequipShout(eqShout)
+            endif
+
+            if eqOtherSpell
+                thePlayer.UnequipSpell(eqOtherSpell, 2)
+            endif
+        endif
+
+        if leftHandSpell
+            thePlayer.EquipSpell(leftHandSpell as Spell, 0)
+        endif
+
+        if rightHandSpell
+            thePlayer.EquipSpell(rightHandSpell as Spell, 1)
+        endif
+
+        if shoutSpell
+            thePlayer.EquipShout(shoutSpell as Shout)
+        endif
+
+        if otherSpell
+            thePlayer.EquipSpell(otherSpell as Spell, 2)
+        endif
 
         Form[] items = JsonUtil.FormListToArray(gearsData.JsonFileName, "binding_gear_items_" + changeToSlot)
 
@@ -524,49 +568,49 @@ function ChangeGear()
             ; endwhile
         endif
 
-        Form leftHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + changeToSlot)
-        Form rightHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + changeToSlot)
-        Form shoutSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + changeToSlot)
-        Form otherSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + changeToSlot)
+        ; Form leftHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + changeToSlot)
+        ; Form rightHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + changeToSlot)
+        ; Form shoutSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + changeToSlot)
+        ; Form otherSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + changeToSlot)
 
-        if doNotUnequipSpells == 0
-            Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
-            Spell eqSpellRight = thePlayer.GetEquippedSpell(1)
-            Shout eqShout = thePlayer.GetEquippedShout()
-            Spell eqOtherSpell = thePlayer.GetEquippedSpell(2)
+        ; if doNotUnequipSpells == 0
+        ;     Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
+        ;     Spell eqSpellRight = thePlayer.GetEquippedSpell(1)
+        ;     Shout eqShout = thePlayer.GetEquippedShout()
+        ;     Spell eqOtherSpell = thePlayer.GetEquippedSpell(2)
 
-            if eqSpellLeft
-                thePlayer.UnequipSpell(eqSpellLeft, 0)
-            endif
+        ;     if eqSpellLeft
+        ;         thePlayer.UnequipSpell(eqSpellLeft, 0)
+        ;     endif
 
-            if eqSpellRight
-                thePlayer.UnequipSpell(eqSpellRight, 1)
-            endif
+        ;     if eqSpellRight
+        ;         thePlayer.UnequipSpell(eqSpellRight, 1)
+        ;     endif
 
-            if eqShout
-                thePlayer.UnequipShout(eqShout)
-            endif
+        ;     if eqShout
+        ;         thePlayer.UnequipShout(eqShout)
+        ;     endif
 
-            if eqOtherSpell
-                thePlayer.UnequipSpell(eqOtherSpell, 2)
-            endif
-        endif
+        ;     if eqOtherSpell
+        ;         thePlayer.UnequipSpell(eqOtherSpell, 2)
+        ;     endif
+        ; endif
 
-        if leftHandSpell
-            thePlayer.EquipSpell(leftHandSpell as Spell, 0)
-        endif
+        ; if leftHandSpell
+        ;     thePlayer.EquipSpell(leftHandSpell as Spell, 0)
+        ; endif
 
-        if rightHandSpell
-            thePlayer.EquipSpell(rightHandSpell as Spell, 1)
-        endif
+        ; if rightHandSpell
+        ;     thePlayer.EquipSpell(rightHandSpell as Spell, 1)
+        ; endif
 
-        if shoutSpell
-            thePlayer.EquipShout(shoutSpell as Shout)
-        endif
+        ; if shoutSpell
+        ;     thePlayer.EquipShout(shoutSpell as Shout)
+        ; endif
 
-        if otherSpell
-            thePlayer.EquipSpell(otherSpell as Spell, 2)
-        endif
+        ; if otherSpell
+        ;     thePlayer.EquipSpell(otherSpell as Spell, 2)
+        ; endif
 
         usingSlot = changeToSlot
 
