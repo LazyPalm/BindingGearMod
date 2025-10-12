@@ -2,6 +2,8 @@ Scriptname bndg_BindingGearManager extends Quest
 
 Actor thePlayer
 
+bool dhlpActive
+
 int[] hotkeys
 int[] modifierKeys
 
@@ -244,14 +246,14 @@ endfunction
 ; endfunction
 
 state DhlpState
-    function ProcessKeyUp(int keyCode, float holdTime)
+    ; function ProcessKeyUp(int keyCode, float holdTime)
 
-        ;TODO - this needs to looks for the hotkey and modifiers - goes off on any key now
+    ;     ;TODO - this needs to looks for the hotkey and modifiers - goes off on any key now
 
-        ;debug.Notification("<font color='#ff0000'>Gear changes suspended with DHLP event running.</font>")
-        bndg_BindingGearManager.WriteToConsole("ProcessKey - In DHLP suspended state")
+    ;     ;debug.Notification("<font color='#ff0000'>Gear changes suspended with DHLP event running.</font>")
+    ;     bndg_BindingGearManager.WriteToConsole("ProcessKey - In DHLP suspended state")
 
-    endfunction
+    ; endfunction
 endstate
 
 bool showingWheel = false
@@ -316,10 +318,23 @@ function StartGearChange(int slot)
     ChangeGear()
 endfunction
 
+Keyword heavyBondageKeyword
 function ChangeGear()
 
     if changeGearWorking
         debug.MessageBox("already working...")
+        return
+    endif
+
+    if dhlpActive
+        
+    endif
+
+    if heavyBondageKeyword == none
+        heavyBondageKeyword = Keyword.GetKeyword("zad_DeviousHeavyBondage")
+    endif
+    if thePlayer.WornHasKeyword(heavyBondageKeyword)
+        debug.MessageBox("Your bound hands prevent outfit changes")
         return
     endif
 
@@ -627,11 +642,13 @@ endfunction
 event OnDhlpSuspend(string eventName, string strArg, float numArg, Form sender)
     bndg_BindingGearManager.WriteToConsole("OnDhlpSuspend sender: " + sender.GetName() + " id: " + sender.GetFormID())
     GoToState("DhlpState")
+    dhlpActive = true
 endevent
 
 event OnDhlpResume(string eventName, string strArg, float numArg, Form sender)
     bndg_BindingGearManager.WriteToConsole("OnDhlpResume sender: " + sender.GetName() + " id: " + sender.GetFormID())
     GoToState("")
+    dhlpActive = false
 endevent
 
 bool Function SafeProcess()
