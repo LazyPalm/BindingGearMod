@@ -59,7 +59,7 @@ endevent
 
 event OnPageReset(string page)
 
-    version = "0.61"
+    version = "0.7"
 
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)
@@ -94,16 +94,18 @@ function DisplaySettings()
     AddHeaderOption("General Settings")
     AddHeaderOption("")
     
-    toggleUseAnimation = AddToggleOption("Use Animation", main.GetUseAnimation())
-    toggleDoNotUnequipSpells = AddToggleOption("Do Not Unequip Spells/Shouts", main.GetDoNotUnequipSpells())
+    toggleUseAnimation = AddToggleOption("Use Animation", 0); main.GetUseAnimation())
+    ;toggleDoNotUnequipSpells = AddToggleOption("Do Not Unequip Spells/Shouts", 0); main.GetDoNotUnequipSpells())
+    AddTextOption("", "")
 
     AddHeaderOption("Hotkeys")
     AddHeaderOption("")
 
     idx = 1
     while idx <= bndg_BindingGearManager.GetSlotCount()
-        int keyCode = main.GetHotkey(idx)
-        int modifierKey = main.GetModifierKey(idx)
+        int keyCode = bndg_SkseFunctions.GetHotkey(idx) ; main.GetHotkey(idx)
+        int modifierKey = bndg_SkseFunctions.GetModifier(idx)
+        MiscUtil.PrintConsole("modifier idx : " + idx + " modifier: " + modifierKey)
         if keyCode == 0
             keyCode = -1
         endif
@@ -112,12 +114,13 @@ function DisplaySettings()
         idx += 1
     endwhile
 
-    int wmHotkey = main.GetWheelMenuHotkey()
+    int wmHotkey = bndg_SkseFunctions.GetHotkey(0); main.GetWheelMenuHotkey()
+    int wmModifierKey = bndg_SkseFunctions.GetModifier(0)
     if wmHotkey == 0
         wmHotkey = -1
     endif
     wheelMenuKeymapOption = AddKeyMapOption("Set wheel menu hotkey", wmHotkey)
-    wheelMenuModifierOption = AddTextOption("Set wheel menu modifier", GetModifierString(main.GetWheelMenuModifier()))
+    wheelMenuModifierOption = AddTextOption("Set wheel menu modifier", GetModifierString(wmModifierKey)) ;GetModifierString(main.GetWheelMenuModifier()))
 
 endfunction
 
@@ -131,41 +134,51 @@ function DisplaySlot(int slot)
     AddHeaderOption("")
 
     toggleLearnSlot = AddTextOption("Learn worn items", "Learn")
-    inputEnterSetName = AddInputOption("Set Name", JsonUtil.GetStringValue(gearsData.JsonFileName, "binding_gear_slot_name_" + slot, ""))    
-    toggleSetLeavesItems = AddToggleOption("Set Leaves Existing Items Equipped", JsonUtil.GetIntValue(gearsData.JsonFileName, "binding_gear_slot_leaves_items_" + slot, 0))
+    inputEnterSetName = AddInputOption("Set Name", bndg_SkseFunctions.GetSetName(selectedSlot))    
+    toggleSetLeavesItems = AddToggleOption("Set Leaves Existing Items Equipped", bndg_SkseFunctions.GetSetLeavesItems(selectedSlot))
     AddTextOption("", "")
 
     AddHeaderOption("Spells / Shout")
     AddHeaderOption("")
 
-    Form leftHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + slot)
-    Form rightHandSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + slot)
-    Form shoutSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + slot)
-    Form otherSpell = JsonUtil.GetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + slot)
+    Spell leftHandSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 1) 
+    Spell rightHandSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 2)
+    Shout shoutSpell = bndg_SkseFunctions.GetShout(selectedSlot)
+    Spell otherSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 3)
+
+    string lSpellName = ""
+    string rSpellName = ""
     string shoutName = ""
-    if shoutSpell
-        shoutName = otherSpell.GetName()
+    if leftHandSpell != none
+        lSpellName = leftHandSpell.GetName()
     endif
-    if otherSpell
+    if rightHandSpell != none
+        rSpellName = rightHandSpell.GetName()
+    endif
+    if shoutSpell != none
+        shoutName = shoutSpell.GetName()
+    endif
+    if otherSpell != none
         shoutName = otherSpell.GetName()
     endif
 
-    toggleClearLeftHandSpell = AddTextOption("Left Hand Spell", leftHandSpell.GetName())
-    toggleClearRightHandSpell = AddTextOption("Right Hand Spell", rightHandSpell.GetName())
-    toggleClearShout = AddTextOption("Shout", shoutName)
+    toggleClearLeftHandSpell = AddTextOption("Left Hand Spell", lSpellName)
+    toggleClearRightHandSpell = AddTextOption("Right Hand Spell", rSpellName)
+    toggleClearShout = AddTextOption("Shout/Voice Spell", shoutName)
     AddTextOption("", "")
 
     AddHeaderOption("Items In Set")
     AddHeaderOption("")
 
-    Form[] items = JsonUtil.FormListToArray(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot)
+    Form[] items = bndg_SkseFunctions.GetSetItems(selectedSlot);
 
     bndg_BindingGearManager.WriteToConsole("DisplaySlot items: " + items)
 
     if items.Length > 0
         idx = 0
         while idx < items.Length
-            toggleClearItem[idx] = AddTextOption(items[idx].GetName(), "")
+            Form item = items[idx]
+            toggleClearItem[idx] = AddTextOption(item.GetName(), "")
             idx += 1
         endwhile
     endif
@@ -176,27 +189,28 @@ function DisplaySlot(int slot)
 
     AddHeaderOption("Learn From Current Gear")
     AddHeaderOption("")
-    ;Form[] inventory = thePlayer.GetContainerForms()
+    Form[] inventory = bndg_SkseFunctions.GetWornGear()
+    ;debug.MessageBox(inventory)
     idx = 0
     int equippedCount = 0
-    Form[] wornItems = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey())
-    while idx < wornItems.Length
-        Form item = wornItems[idx]
-        if item != none
+    ; Form[] wornItems = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey())
+    ; while idx < wornItems.Length
+    ;     Form item = wornItems[idx]
+    ;     if item != none
+    ;         equippedCount += 1
+    ;         toggleLearnItem[idx] = AddTextOption(item.GetName(), "")
+    ;     endif
+    ;     idx += 1
+    ; endwhile
+    while idx < inventory.Length
+        Form item = inventory[idx]
+        if thePlayer.IsEquipped(item) && item.IsPlayable()
             equippedCount += 1
+            ;bndg_BindingGearManager.WriteToConsole("equipped item: " + item)
             toggleLearnItem[idx] = AddTextOption(item.GetName(), "")
         endif
         idx += 1
     endwhile
-    ; while idx < inventory.Length
-    ;     Form item = inventory[idx]
-    ;     if thePlayer.IsEquipped(item) && item.IsPlayable()
-    ;         equippedCount += 1
-    ;         ;bndg_BindingGearManager.WriteToConsole("equipped item: " + item)
-    ;         toggleLearnItem[idx] = AddTextOption(items[idx].GetName(), "")
-    ;     endif
-    ;     idx += 1
-    ; endwhile
     
     if equippedCount % 2 != 0 && equippedCount > 0
         AddTextOption("", "")
@@ -229,7 +243,7 @@ endfunction
 bool working
 
 string function GetModifierString(int modifierValue)
-    string modifierStr = "None"
+    string modifierStr = "No Modifier Key"
     if modifierValue == keyCodeLeftAlt
         modifierStr = "Left Alt"
     elseif modifierValue == keyCodeRightAlt
@@ -264,8 +278,7 @@ endfunction
 
 event OnOptionInputAccept(int option, string textStr)
 	if (option == inputEnterSetName)
-		JsonUtil.SetStringValue(gearsData.JsonFileName, "binding_gear_slot_name_" + selectedSlot, textStr)
-        JsonUtil.Save(gearsData.JsonFileName)
+        bndg_SkseFunctions.SetSetName(selectedSlot, textStr)
 		SetInputOptionValue(option, textStr)
 	endIf
 endEvent
@@ -275,22 +288,20 @@ event OnOptionSelect(int option)
     bool skipOthers = false
 
     if option == toggleSetLeavesItems
-        int leavesItems = JsonUtil.GetIntValue(gearsData.JsonFileName, "binding_gear_slot_leaves_items_" + selectedSlot, 0)
+        int leavesItems = bndg_SkseFunctions.GetSetLeavesItems(selectedSlot)
         if leavesItems == 1
             leavesItems = 0
         else
             leavesitems = 1
         endif
-        JsonUtil.SetIntValue(gearsData.JsonFileName, "binding_gear_slot_leaves_items_" + selectedSlot, leavesItems)
-        JsonUtil.Save(gearsData.JsonFileName)
+        bndg_SkseFunctions.ToggleSetLeavesItems(selectedSlot, leavesItems == 1)
         SetToggleOptionValue(option, leavesItems)
         skipOthers = true        
     endif
 
     if option == toggleClearLeftHandSpell
         if ShowMessage("Clear left hand spell?", true, "$Yes", "$No")
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + selectedSlot, none)
-            JsonUtil.Save(gearsData.JsonFileName)
+            bndg_SkseFunctions.ClearSpell(selectedSlot, 1)
             ForcePageReset()
         endif
         skipOthers = true
@@ -298,8 +309,7 @@ event OnOptionSelect(int option)
 
     if option == toggleClearRightHandSpell
         if ShowMessage("Clear right hand spell?", true, "$Yes", "$No")
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + selectedSlot, none)
-            JsonUtil.Save(gearsData.JsonFileName)
+            bndg_SkseFunctions.ClearSpell(selectedSlot, 2)
             ForcePageReset()
         endif
         skipOthers = true
@@ -307,76 +317,94 @@ event OnOptionSelect(int option)
 
     if option == toggleClearShout
         if ShowMessage("Clear shout?", true, "$Yes", "$No")
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + selectedSlot, none)
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + selectedSlot, none)
-            JsonUtil.Save(gearsData.JsonFileName)
+            bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
             ForcePageReset()
         endif
         skipOthers = true
     endif
 
     if option == toggleLearnLeftHandSpell
-        if ShowMessage("Learn left hand spell?", true, "$Yes", "$No")
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + selectedSlot, thePlayer.GetEquippedSpell(0))
-            JsonUtil.Save(gearsData.JsonFileName)
-            ForcePageReset()
+        if thePlayer.GetEquippedSpell(0) == none
+            ShowMessage("No left hand spell equipped", false)
+        else
+            if ShowMessage("Learn left hand spell?", true, "$Yes", "$No")
+                bndg_SkseFunctions.LearnSpell(selectedSlot, 1, thePlayer.GetEquippedSpell(0))
+                ForcePageReset()
+            endif
         endif
         skipOthers = true
     endif
 
     if option == toggleLearnRightHandSpell
-        if ShowMessage("Learn right hand spell?", true, "$Yes", "$No")
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + selectedSlot, thePlayer.GetEquippedSpell(1))
-            JsonUtil.Save(gearsData.JsonFileName)
-            ForcePageReset()
+        if thePlayer.GetEquippedSpell(1) == none
+            ShowMessage("No right hand spell equipped", false)
+        else
+            if ShowMessage("Learn right hand spell?", true, "$Yes", "$No")
+                bndg_SkseFunctions.LearnSpell(selectedSlot, 2, thePlayer.GetEquippedSpell(1))
+                ForcePageReset()
+            endif
         endif
         skipOthers = true
     endif
 
     if option == toggleLearnShout
-        if ShowMessage("Learn shout?", true, "$Yes", "$No")
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + selectedSlot, thePlayer.GetEquippedShout())
-            JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + selectedSlot, thePlayer.GetEquippedSpell(2))
-            JsonUtil.Save(gearsData.JsonFileName)
-            ForcePageReset()
+        if thePlayer.GetEquippedSpell(2) == none && thePlayer.GetEquippedShout() == none
+            ShowMessage("No shout or voice spell equipped", false)
+        else
+            if ShowMessage("Learn shout / voice spell?", true, "$Yes", "$No")
+                if thePlayer.GetEquippedSpell(2) != none
+                    bndg_SkseFunctions.LearnSpell(selectedSlot, 3, thePlayer.GetEquippedSpell(2))
+                    bndg_SkseFunctions.ClearShout(selectedSlot)
+                else
+                    bndg_SkseFunctions.LearnShout(selectedSlot, thePlayer.GetEquippedShout())
+                    bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
+                endif
+                ForcePageReset()
+            endif
         endif
         skipOthers = true
     endif
 
     if option == toggleUseAnimation
-        if main.GetUseAnimation() == 1
-            main.SetUseAnimation(0)
-            SetToggleOptionValue(option, 0)
-        else
-            main.SetUseAnimation(1)
-            SetToggleOptionValue(option, 1)
-        endif
+        ; if main.GetUseAnimation() == 1
+        ;     main.SetUseAnimation(0)
+        ;     SetToggleOptionValue(option, 0)
+        ; else
+        ;     main.SetUseAnimation(1)
+        ;     SetToggleOptionValue(option, 1)
+        ; endif
         skipOthers = true
     endif
 
     if option == toggleDoNotUnequipSpells
-        if main.GetDoNotUnequipSpells() == 1
-            main.SetDoNotUnequipSpells(0)
-            SetToggleOptionValue(option, 0)
-        else
-            main.SetDoNotUnequipSpells(1)
-            SetToggleOptionValue(option, 1)
-        endif
+        ; if main.GetDoNotUnequipSpells() == 1
+        ;     main.SetDoNotUnequipSpells(0)
+        ;     SetToggleOptionValue(option, 0)
+        ; else
+        ;     main.SetDoNotUnequipSpells(1)
+        ;     SetToggleOptionValue(option, 1)
+        ; endif
         skipOthers = true
     endif
 
     if option == wheelMenuModifierOption
-        int currentModifier = main.GetWheelMenuModifier()
-        int newModifier = AdvanceModifierValue(currentModifier)
-        main.SetWheelMenuModifier(newModifier)
-        SetTextOptionValue(option, GetModifierString(newModifier))
+        int hk = bndg_SkseFunctions.GetHotkey(0)
+        int hkm = bndg_SkseFunctions.GetModifier(0)
+        int newModifier = AdvanceModifierValue(hkm)
+
+        bndg_SkseFunctions.LearnHotKey(0, hk, newModifier)
+        ; int currentModifier = main.GetWheelMenuModifier()
+        ; int newModifier = AdvanceModifierValue(currentModifier)
+        ; main.SetWheelMenuModifier(newModifier)
+        ; SetTextOptionValue(option, GetModifierString(newModifier))
         skipOthers = true
     endif
 
     if option == toggleLearnSlot && !working && !skipOthers
         working = true
         if ShowMessage("Use worn items to build this slot?", true, "$Yes", "$No")
-            LearnWornGear()
+            ;LearnWornGear()
+            bndg_SkseFunctions.LearnWornGear(selectedSlot);
             ForcePageReset()
             skipOthers = true
         endif
@@ -388,9 +416,14 @@ event OnOptionSelect(int option)
         idx = 1
         while idx <= bndg_BindingGearManager.GetSlotCount()
             if option == modifierOption[idx]
-                int currentModifier = main.GetModifierKey(idx)
-                int newModifier = AdvanceModifierValue(currentModifier)
-                main.SetModifierKey(idx, newModifier)
+                int hk = bndg_SkseFunctions.GetHotkey(idx)
+                int hkm = bndg_SkseFunctions.GetModifier(idx)
+                int newModifier = AdvanceModifierValue(hkm)
+                ;debug.MessageBox("idx: " + idx + " hk:" + hk + " hkm: " + hkm + " new: " + newModifier)
+                bndg_SkseFunctions.LearnHotKey(idx, hk, newModifier)
+                ; int currentModifier = main.GetModifierKey(idx)
+                ; int newModifier = AdvanceModifierValue(currentModifier)
+                ; main.SetModifierKey(idx, newModifier)
                 SetTextOptionValue(option, GetModifierString(newModifier))
                 skipOthers = true
                 ;ForcePageReset()
@@ -403,13 +436,12 @@ event OnOptionSelect(int option)
     if !working && !skipOthers
         working = true
         idx = 0
-        int itemCount = JsonUtil.FormListCount(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot)
-        while idx < itemCount
+        Form[] items = bndg_SkseFunctions.GetSetItems(selectedSlot)
+        while idx < items.Length
             if option == toggleClearItem[idx]
-                Form selectedItem = JsonUtil.FormListGet(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, idx)
+                Form selectedItem = items[idx] ;JsonUtil.FormListGet(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, idx)
                 if ShowMessage("Remove " + selectedItem.GetName() + " from set?", true, "$Yes", "$No")
-                    JsonUtil.FormListRemoveAt(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, idx)
-                    JsonUtil.Save(gearsData.JsonFileName)
+                    bndg_SkseFunctions.RemoveSetItem(selectedSlot, selectedItem)
                     ForcePageReset()
                     skipOthers = true
                 endif
@@ -422,14 +454,13 @@ event OnOptionSelect(int option)
 
     if !working && !skipOthers
         working = true
-        Form[] inventory = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey())
+        Form[] items = bndg_SkseFunctions.GetWornGear()
         idx = 0
-        while idx < inventory.Length
+        while idx < items.Length
             if option == toggleLearnItem[idx]
-                Form selectedItem = inventory[idx]
+                Form selectedItem = items[idx]
                 if ShowMessage("Learn " + selectedItem.GetName() + " from set?", true, "$Yes", "$No")
-                    JsonUtil.FormListAdd(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, selectedItem, false)
-                    JsonUtil.Save(gearsData.JsonFileName)
+                    bndg_SkseFunctions.AddSetItem(selectedSlot, selectedItem)
                     ForcePageReset()
                     skipOthers = true
                 endif
@@ -462,22 +493,25 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
 
 	if (continue)
         if option == wheelMenuKeymapOption
-            if main.GetWheelMenuHotkey() > 0
-                UnregisterForKey(main.GetWheelMenuHotkey())
-            endif
-            main.SetWheelMenuHotKey(keyCode)
-            RegisterForKey(keyCode)
+            ; if main.GetWheelMenuHotkey() > 0
+            ;     ;UnregisterForKey(main.GetWheelMenuHotkey())
+            ; endif
+            ;main.SetWheelMenuHotKey(keyCode)
+            ;RegisterForKey(keyCode)
+            bndg_SkseFunctions.LearnHotKey(0, keyCode, 0)
             SetKeyMapOptionValue(wheelMenuKeymapOption, keyCode)
         endif
 
         idx = 1
         while idx <= bndg_BindingGearManager.GetSlotCount()
             if option == keymapOption[idx]
-                if main.GetHotkey(idx) > 0
-                    UnregisterForKey(main.GetHotkey(idx))
-                endif
-                main.SetHotkey(idx, keyCode)
-                RegisterForKey(keyCode)
+                ; if main.GetHotkey(idx) > 0
+                ;     ;UnregisterForKey(main.GetHotkey(idx))
+                ; endif
+                bndg_SkseFunctions.LearnHotKey(idx, keyCode, 0)
+                ;Debug.MessageBox(keyCode)
+                ;main.SetHotkey(idx, keyCode)
+                ;RegisterForKey(keyCode)
                 SetKeyMapOptionValue(keymapOption[idx], keyCode)
             endif
             idx += 1
@@ -485,37 +519,6 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
     endif
 
 endevent
-
-function LearnWornGear()
-
-    Form[] inventory = StorageUtil.FormListToArray(thePlayer, bndg_Data.WornItemsStorageKey()); thePlayer.GetContainerForms()
-
-    JsonUtil.FormListClear(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot)
-
-    idx = 0
-	while idx < inventory.Length
-		Form item = inventory[idx]
-        if thePlayer.IsEquipped(item) 
-            if item.HasKeyword(main.zlib.zad_Lockable) || item.HasKeyword(main.zlib.zad_InventoryDevice)
-                bndg_BindingGearManager.WriteToConsole("Item " + item.GetName() + " is a devious device")
-            else
-                if item.IsPlayable()
-                    JsonUtil.IntListAdd(gearsData.JsonFileName, "binding_gear_item_refs_" + selectedSlot, StorageUtil.GetIntValue(item, "gear_guid", 0), true)
-                    JsonUtil.FormListAdd(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, item, true)
-                endif
-            endif
-        endif
-        idx += 1
-    endwhile
-
-    JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_left_" + selectedSlot, thePlayer.GetEquippedSpell(0))
-    JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_right_" + selectedSlot, thePlayer.GetEquippedSpell(1))
-    JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_shout_" + selectedSlot, thePlayer.GetEquippedShout())
-    JsonUtil.SetFormValue(gearsData.JsonFileName, "binding_gear_spell_other_" + selectedSlot, thePlayer.GetEquippedSpell(2))
-
-    JsonUtil.Save(gearsData.JsonFileName)
-
-endfunction
 
 bndg_BindingGearManager property main auto
 bndg_Data property gearsData auto
