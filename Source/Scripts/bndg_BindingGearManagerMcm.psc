@@ -170,7 +170,7 @@ function DisplaySlot(int slot)
     AddHeaderOption("Items In Set")
     AddHeaderOption("")
 
-    Form[] items = bndg_SkseFunctions.GetSetItems(selectedSlot);
+    Form[] items = bndg_SkseFunctions.GetSetItems(selectedSlot)
 
     bndg_BindingGearManager.WriteToConsole("DisplaySlot items: " + items)
 
@@ -221,6 +221,17 @@ function DisplaySlot(int slot)
     Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
     Spell eqSpellRight = thePlayer.GetEquippedSpell(1)
 
+    string eqLeftSpellName = ""
+    string eqRightSpellName = ""
+
+    if eqSpellLeft != none
+        eqLeftSpellName = eqSpellLeft.GetName()
+    endif
+
+    if eqSpellRight != none
+        eqRightSpellName = eqSpellRight.GetName()
+    endif
+
     string eqShoutName = ""
     Shout eqShout = thePlayer.GetEquippedShout()
     Spell eqSpellOther = thePlayer.GetEquippedSpell(2)
@@ -233,8 +244,8 @@ function DisplaySlot(int slot)
 
     bndg_BindingGearManager.WriteToConsole("equipped shout: " + eqShout + " power: " + eqSpellOther)
 
-    toggleLearnLeftHandSpell = AddTextOption("Left Hand Spell", eqSpellLeft.GetName())
-    toggleLearnRightHandSpell = AddTextOption("Right Hand Spell", eqSpellRight.GetName())
+    toggleLearnLeftHandSpell = AddTextOption("Left Hand Spell", eqLeftSpellName)
+    toggleLearnRightHandSpell = AddTextOption("Right Hand Spell", eqRightSpellName)
     toggleLearnShout = AddTextOption("Shout", eqShoutName)
     AddTextOption("", "")
 

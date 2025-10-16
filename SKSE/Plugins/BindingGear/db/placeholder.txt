@@ -1,0 +1,1 @@
+This file is used to create the SKSE\Plugins\BindingGear\db folder before the db is created
