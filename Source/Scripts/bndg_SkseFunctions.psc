@@ -20,6 +20,8 @@ Spell function GetSpell(int slot, int spellSlot) global native
 function Dress(int slot) global native
 int function GetSetLeavesItems(int slot) global native
 function ToggleSetLeavesItems(int slot, bool leavesItems) global native
+int function GetShowAnimations() global native
+function ToggleAnimations(int toggleOn) global native
 
 int function DisplayWheelMenuBridge(int[] slots, string[] setNames) global
     bndg_BindingGearManager gear = Quest.GetQuest("bndg_BindingGearManagerQuest") as bndg_BindingGearManager

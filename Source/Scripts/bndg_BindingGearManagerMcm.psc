@@ -94,7 +94,7 @@ function DisplaySettings()
     AddHeaderOption("General Settings")
     AddHeaderOption("")
     
-    toggleUseAnimation = AddToggleOption("Use Animation", 0); main.GetUseAnimation())
+    toggleUseAnimation = AddToggleOption("Use Animation", bndg_SkseFunctions.GetShowAnimations())
     ;toggleDoNotUnequipSpells = AddToggleOption("Do Not Unequip Spells/Shouts", 0); main.GetDoNotUnequipSpells())
     AddTextOption("", "")
 
@@ -377,13 +377,13 @@ event OnOptionSelect(int option)
     endif
 
     if option == toggleUseAnimation
-        ; if main.GetUseAnimation() == 1
-        ;     main.SetUseAnimation(0)
-        ;     SetToggleOptionValue(option, 0)
-        ; else
-        ;     main.SetUseAnimation(1)
-        ;     SetToggleOptionValue(option, 1)
-        ; endif
+        if bndg_SkseFunctions.GetShowAnimations() == 1
+            bndg_SkseFunctions.ToggleAnimations(0)
+            SetToggleOptionValue(option, 0)
+        else
+            bndg_SkseFunctions.ToggleAnimations(1)
+            SetToggleOptionValue(option, 1)
+        endif
         skipOthers = true
     endif
 
@@ -407,7 +407,7 @@ event OnOptionSelect(int option)
         ; int currentModifier = main.GetWheelMenuModifier()
         ; int newModifier = AdvanceModifierValue(currentModifier)
         ; main.SetWheelMenuModifier(newModifier)
-        ; SetTextOptionValue(option, GetModifierString(newModifier))
+        SetTextOptionValue(option, GetModifierString(newModifier))
         skipOthers = true
     endif
 
@@ -519,7 +519,8 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
                 ; if main.GetHotkey(idx) > 0
                 ;     ;UnregisterForKey(main.GetHotkey(idx))
                 ; endif
-                bndg_SkseFunctions.LearnHotKey(idx, keyCode, 0)
+                int hkm = bndg_SkseFunctions.GetModifier(idx)
+                bndg_SkseFunctions.LearnHotKey(idx, keyCode, hkm)
                 ;Debug.MessageBox(keyCode)
                 ;main.SetHotkey(idx, keyCode)
                 ;RegisterForKey(keyCode)
