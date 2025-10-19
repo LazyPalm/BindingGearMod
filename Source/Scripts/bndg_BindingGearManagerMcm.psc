@@ -23,6 +23,14 @@ int toggleLearnLeftHandSpell
 int toggleLearnRightHandSpell
 int toggleLearnShout
 
+int toggleClearPrimaryWeapon
+int toggleClearOffhandWeapon
+int toggleClearAmmo
+
+int toggleLearnPrimaryWeapon
+int toggleLearnOffhandWeapon
+int toggleLearnAmmo
+
 int[] keymapOption
 int[] modifierOption
 
@@ -133,9 +141,35 @@ function DisplaySlot(int slot)
     AddHeaderOption("Set " + slot)
     AddHeaderOption("")
 
-    toggleLearnSlot = AddTextOption("Learn worn items", "Learn")
+    toggleLearnSlot = AddTextOption("Learn equipped armor", "Learn")
     inputEnterSetName = AddInputOption("Set Name", bndg_SkseFunctions.GetSetName(selectedSlot))    
     toggleSetLeavesItems = AddToggleOption("Set Leaves Existing Items Equipped", bndg_SkseFunctions.GetSetLeavesItems(selectedSlot))
+    AddTextOption("", "")
+
+    AddHeaderOption("Weapons / Ammo")
+    AddHeaderOption("")
+
+    Form storedWeapon1 = bndg_SkseFunctions.GetWeapon(selectedSlot, true)
+    Form storedWeapon2 = bndg_SkseFunctions.GetWeapon(selectedSlot, false)
+    Form storedAmmo = bndg_SkseFunctions.GetAmmo(selectedSlot)
+
+    string storedWeapon1Name = ""
+    string storedWeapon2Name = ""
+    string storedAmmoName = ""
+
+    if storedWeapon1 != none
+        storedWeapon1Name = storedWeapon1.GetName()
+    endif
+    if storedWeapon2 != none
+        storedWeapon2Name = storedWeapon2.GetName()
+    endif
+    if storedAmmo != none
+        storedAmmoName = storedAmmo.GetName()
+    endif
+
+    toggleClearPrimaryWeapon = AddTextOption("Primary Weapon", storedWeapon1Name)
+    toggleClearOffhandWeapon = AddTextOption("Offhand Weapon", storedWeapon2Name)
+    toggleClearAmmo = AddTextOption("Ammo", storedAmmoName)
     AddTextOption("", "")
 
     AddHeaderOption("Spells / Shout")
@@ -187,7 +221,7 @@ function DisplaySlot(int slot)
         AddTextOption("", "")
     endif
 
-    AddHeaderOption("Learn From Current Gear")
+    AddHeaderOption("Learn From Equipped Gear")
     AddHeaderOption("")
     Form[] inventory = bndg_SkseFunctions.GetWornGear()
     ;debug.MessageBox(inventory)
@@ -215,6 +249,32 @@ function DisplaySlot(int slot)
     if equippedCount % 2 != 0 && equippedCount > 0
         AddTextOption("", "")
     endif
+
+    AddHeaderOption("Learn From Equipped Weapons / Ammo")
+    AddHeaderOption("")
+    Form eqWeapon1 = thePlayer.GetEquippedWeapon(false)
+    Form eqWeapon2 = thePlayer.GetEquippedWeapon(true)
+    Form eqAmmo = bndg_SkseFunctions.GetEquippedAmmo(thePlayer)
+
+    string eqWeapon1Name = ""
+    string eqWeapon2Name = ""
+    string eqAmmoName = ""
+
+    if eqWeapon1 != none
+        eqWeapon1Name = eqWeapon1.GetName()
+    endif
+    if eqWeapon2 != none
+        eqWeapon2Name = eqWeapon2.GetName()
+    endif
+    if eqAmmo != none
+        eqAmmoName = eqAmmo.GetName()
+    endif
+
+    toggleLearnPrimaryWeapon = AddTextOption("Primary Weapon", eqWeapon1Name)
+    toggleLearnOffhandWeapon = AddTextOption("Offhand Weapon", eqWeapon2Name)
+    toggleLearnAmmo = AddTextOption("Ammo", eqAmmoName)
+    AddTextOption("", "")
+
 
     AddHeaderOption("Learn From Equipped Spells / Shout")
     AddHeaderOption("")
@@ -330,6 +390,66 @@ event OnOptionSelect(int option)
         if ShowMessage("Clear shout?", true, "$Yes", "$No")
             bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
             ForcePageReset()
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleClearPrimaryWeapon
+        if ShowMessage("Clear primary weapon?", true, "$Yes", "$No")
+            bndg_SkseFunctions.ClearWeapon(selectedSlot, true)
+            ForcePageReset()
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleClearOffhandWeapon
+        if ShowMessage("Clear offhand weapon?", true, "$Yes", "$No")
+            bndg_SkseFunctions.ClearWeapon(selectedSlot, false)
+            ForcePageReset()
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleClearAmmo
+        if ShowMessage("Clear ammo?", true, "$Yes", "$No")
+            bndg_SkseFunctions.ClearAmmo(selectedSlot)
+            ForcePageReset()
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleLearnPrimaryWeapon
+        if thePlayer.GetEquippedWeapon(false) == none
+            ShowMessage("No primary weapon equipped", false)
+        else
+            if ShowMessage("Learn primary weapon?", true, "$Yes", "$No")
+                bndg_SkseFunctions.LearnWeapon(selectedSlot, true)
+                ForcePageReset()
+            endif
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleLearnOffhandWeapon
+        if thePlayer.GetEquippedWeapon(false) == none
+            ShowMessage("No offhand weapon equipped", false)
+        else
+            if ShowMessage("Learn offhand weapon?", true, "$Yes", "$No")
+                bndg_SkseFunctions.LearnWeapon(selectedSlot, false)
+                ForcePageReset()
+            endif
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleLearnAmmo
+        if bndg_SkseFunctions.GetEquippedAmmo(thePlayer) == none
+            ShowMessage("No ammo is equipped", false)
+        else
+            if ShowMessage("Learn ammo?", true, "$Yes", "$No")
+                bndg_SkseFunctions.LearnAmmo(selectedSlot)
+                ForcePageReset()
+            endif
         endif
         skipOthers = true
     endif

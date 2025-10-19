@@ -22,6 +22,13 @@ int function GetSetLeavesItems(int slot) global native
 function ToggleSetLeavesItems(int slot, bool leavesItems) global native
 int function GetShowAnimations() global native
 function ToggleAnimations(int toggleOn) global native
+function LearnWeapon(int slot, bool mainHand) global native
+function LearnAmmo(int slot) global native
+Form function GetWeapon(int slot, bool mainHand) global native
+Form function GetAmmo(int slot) global native
+Form function GetEquippedAmmo(Actor act) global native
+function ClearWeapon(int slot, bool mainHand) global native
+function ClearAmmo(int slot) global native
 
 int function DisplayWheelMenuBridge(int[] slots, string[] setNames) global
     bndg_BindingGearManager gear = Quest.GetQuest("bndg_BindingGearManagerQuest") as bndg_BindingGearManager
