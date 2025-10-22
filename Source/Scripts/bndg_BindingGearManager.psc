@@ -64,9 +64,13 @@ function ShowWheelMenu(int[] slots, string[] setNames)
             if name == ""
                 name = "Set " + slots[idx]
             endif
-            actionMenu.SetPropertyIndexString("optionText", slots[idx] - 1, name)
-            actionMenu.SetPropertyIndexString("optionLabelText", slots[idx] - 1, name)
-            actionMenu.SetPropertyIndexBool("optionEnabled", slots[idx] - 1, true)
+            if name == "inactive"
+
+            else
+                actionMenu.SetPropertyIndexString("optionText", slots[idx] - 1, name)
+                actionMenu.SetPropertyIndexString("optionLabelText", slots[idx] - 1, name)
+                actionMenu.SetPropertyIndexBool("optionEnabled", slots[idx] - 1, true)
+            endif
             idx += 1
         endwhile
 
