@@ -134,6 +134,8 @@ endfunction
 
 function DisplaySlot(int slot)
 
+    ;ShowMessage("slot: " + slot, false)
+
     bndg_BindingGearManager.WriteToConsole("DisplaySlot slot: " + slot)
 
     selectedSlot = slot
@@ -371,24 +373,27 @@ event OnOptionSelect(int option)
     endif
 
     if option == toggleClearLeftHandSpell
-        if ShowMessage("Clear left hand spell?", true, "$Yes", "$No")
+        if ShowMessage("Clear left hand spell? slot -" + selectedSlot, true, "$Yes", "$No")
             bndg_SkseFunctions.ClearSpell(selectedSlot, 1)
+            ShowMessage("Left hand spell cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
     endif
 
     if option == toggleClearRightHandSpell
-        if ShowMessage("Clear right hand spell?", true, "$Yes", "$No")
+        if ShowMessage("Clear right hand spell? slot -" + selectedSlot, true, "$Yes", "$No")
             bndg_SkseFunctions.ClearSpell(selectedSlot, 2)
+            ShowMessage("Right hand spell cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
     endif
 
     if option == toggleClearShout
-        if ShowMessage("Clear shout?", true, "$Yes", "$No")
+        if ShowMessage("Clear shout? slot -" + selectedSlot, true, "$Yes", "$No")
             bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
+            ShowMessage("Shout cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
@@ -397,6 +402,7 @@ event OnOptionSelect(int option)
     if option == toggleClearPrimaryWeapon
         if ShowMessage("Clear primary weapon?", true, "$Yes", "$No")
             bndg_SkseFunctions.ClearWeapon(selectedSlot, true)
+            ShowMessage("Primary weapon cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
@@ -405,6 +411,7 @@ event OnOptionSelect(int option)
     if option == toggleClearOffhandWeapon
         if ShowMessage("Clear offhand weapon?", true, "$Yes", "$No")
             bndg_SkseFunctions.ClearWeapon(selectedSlot, false)
+            ShowMessage("Offhand weapon cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
@@ -413,6 +420,7 @@ event OnOptionSelect(int option)
     if option == toggleClearAmmo
         if ShowMessage("Clear ammo?", true, "$Yes", "$No")
             bndg_SkseFunctions.ClearAmmo(selectedSlot)
+            ShowMessage("Ammo cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
@@ -424,6 +432,7 @@ event OnOptionSelect(int option)
         else
             if ShowMessage("Learn primary weapon?", true, "$Yes", "$No")
                 bndg_SkseFunctions.LearnWeapon(selectedSlot, true)
+                ShowMessage("Primary weapon learned", false)
                 ForcePageReset()
             endif
         endif
@@ -436,6 +445,7 @@ event OnOptionSelect(int option)
         else
             if ShowMessage("Learn offhand weapon?", true, "$Yes", "$No")
                 bndg_SkseFunctions.LearnWeapon(selectedSlot, false)
+                ShowMessage("Offhand weapon learned", false)
                 ForcePageReset()
             endif
         endif
@@ -448,6 +458,7 @@ event OnOptionSelect(int option)
         else
             if ShowMessage("Learn ammo?", true, "$Yes", "$No")
                 bndg_SkseFunctions.LearnAmmo(selectedSlot)
+                ShowMessage("Ammo learned", false)
                 ForcePageReset()
             endif
         endif
@@ -460,6 +471,7 @@ event OnOptionSelect(int option)
         else
             if ShowMessage("Learn left hand spell?", true, "$Yes", "$No")
                 bndg_SkseFunctions.LearnSpell(selectedSlot, 1, thePlayer.GetEquippedSpell(0))
+                ShowMessage("Left hand spell learned", false)
                 ForcePageReset()
             endif
         endif
@@ -472,6 +484,7 @@ event OnOptionSelect(int option)
         else
             if ShowMessage("Learn right hand spell?", true, "$Yes", "$No")
                 bndg_SkseFunctions.LearnSpell(selectedSlot, 2, thePlayer.GetEquippedSpell(1))
+                ShowMessage("Right hand spell learned", false)
                 ForcePageReset()
             endif
         endif
@@ -490,6 +503,7 @@ event OnOptionSelect(int option)
                     bndg_SkseFunctions.LearnShout(selectedSlot, thePlayer.GetEquippedShout())
                     bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
                 endif
+                ShowMessage("Shout / voice spell learned", false)
                 ForcePageReset()
             endif
         endif
@@ -536,6 +550,7 @@ event OnOptionSelect(int option)
         if ShowMessage("Use worn items to build this slot?", true, "$Yes", "$No")
             ;LearnWornGear()
             bndg_SkseFunctions.LearnWornGear(selectedSlot);
+            ShowMessage("Worn items learned", false)
             ForcePageReset()
             skipOthers = true
         endif
@@ -573,6 +588,7 @@ event OnOptionSelect(int option)
                 Form selectedItem = items[idx] ;JsonUtil.FormListGet(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, idx)
                 if ShowMessage("Remove " + selectedItem.GetName() + " from set?", true, "$Yes", "$No")
                     bndg_SkseFunctions.RemoveSetItem(selectedSlot, selectedItem)
+                    ShowMessage("Item removed from set", false)
                     ForcePageReset()
                     skipOthers = true
                 endif
@@ -592,6 +608,7 @@ event OnOptionSelect(int option)
                 Form selectedItem = items[idx]
                 if ShowMessage("Learn " + selectedItem.GetName() + " from set?", true, "$Yes", "$No")
                     bndg_SkseFunctions.AddSetItem(selectedSlot, selectedItem)
+                    ShowMessage("Item added to set", false)
                     ForcePageReset()
                     skipOthers = true
                 endif
