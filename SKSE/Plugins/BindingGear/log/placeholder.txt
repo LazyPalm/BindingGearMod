@@ -1,0 +1,1 @@
+This file is used to create the SKSE\Plugins\BindingGear\log folder before the log files are created
