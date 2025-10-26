@@ -73,7 +73,7 @@ endevent
 
 event OnPageReset(string page)
 
-    version = "0.7"
+    version = "0.8"
 
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)

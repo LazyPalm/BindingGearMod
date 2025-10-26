@@ -64,7 +64,9 @@ function EquipSet(int slot)
     Form storedRightHand = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + s)
     Form storedAmmo = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_AMMO + s)
     Form storedVoice = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + s)
-    int storedLeaves = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS, 0)
+    int storedLeaves = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS + s)
+
+    ;debug.MessageBox(storedLeaves)
 
     Debug.Notification("Equipping outfit " + StorageUtil.GetStringValue(thePlayer, gearsData.STORAGE_KEY_SET_NAME + s, "" + s))
 
@@ -109,7 +111,7 @@ function ShowWheelMenu() ;int[] slots, string[] setNames)
             Form storedRightHand = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + s)
             Form storedAmmo = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_AMMO + s)
             Form storedVoice = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + s)
-            int storedLeaves = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS, 0)
+            int storedLeaves = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS + s)
 
             Debug.Notification("Equipping outfit " + StorageUtil.GetStringValue(thePlayer, gearsData.STORAGE_KEY_SET_NAME + s, "" + s))
             ;debug.MessageBox(items);
