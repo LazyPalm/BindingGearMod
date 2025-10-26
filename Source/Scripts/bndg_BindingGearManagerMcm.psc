@@ -23,12 +23,12 @@ int toggleLearnLeftHandSpell
 int toggleLearnRightHandSpell
 int toggleLearnShout
 
-int toggleClearPrimaryWeapon
-int toggleClearOffhandWeapon
+int toggleClearRightHandWeapon
+int toggleClearLeftHandWeapon
 int toggleClearAmmo
 
-int toggleLearnPrimaryWeapon
-int toggleLearnOffhandWeapon
+int toggleLearnRightHandWeapon
+int toggleLearnLeftHandWeapon
 int toggleLearnAmmo
 
 int[] keymapOption
@@ -43,6 +43,12 @@ int keyCodeLeftAlt = 56
 int keyCodeRightAlt = 184
 int keyCodeLeftShift = 42
 int keyCodeRightShift = 54
+
+; string storageKeyGear = "gear_set_"
+; string storageKeyLeftHand = "gear_left_"
+; string storageKeyRightHand = "gear_right_"
+; string storageKeyAmmo = "gear_ammo_"
+; string storageKeyVoice = "gear_voice_"
 
 ;adding a note - testing github
 
@@ -111,9 +117,9 @@ function DisplaySettings()
     AddHeaderOption("")
 
     idx = 1
-    while idx <= bndg_BindingGearManager.GetSlotCount()
-        int keyCode = bndg_SkseFunctions.GetHotkey(idx) ; main.GetHotkey(idx)
-        int modifierKey = bndg_SkseFunctions.GetModifier(idx)
+    while idx <= gearsData.SLOT_COUNT
+        int keyCode = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + idx) ; bndg_SkseFunctions.GetHotkey(idx) ; main.GetHotkey(idx)
+        int modifierKey = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + idx) ;bndg_SkseFunctions.GetModifier(idx)
         MiscUtil.PrintConsole("modifier idx : " + idx + " modifier: " + modifierKey)
         if keyCode == 0
             keyCode = -1
@@ -123,8 +129,8 @@ function DisplaySettings()
         idx += 1
     endwhile
 
-    int wmHotkey = bndg_SkseFunctions.GetHotkey(0); main.GetWheelMenuHotkey()
-    int wmModifierKey = bndg_SkseFunctions.GetModifier(0)
+    int wmHotkey = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + "0") ;bndg_SkseFunctions.GetHotkey(0); main.GetWheelMenuHotkey()
+    int wmModifierKey = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER+ "0") ;bndg_SkseFunctions.GetModifier(0)
     if wmHotkey == 0
         wmHotkey = -1
     endif
@@ -145,69 +151,45 @@ function DisplaySlot(int slot)
     AddHeaderOption("")
 
     toggleLearnSlot = AddTextOption("Learn equipped armor", "Learn")
-    inputEnterSetName = AddInputOption("Set Name", bndg_SkseFunctions.GetSetName(selectedSlot))    
-    toggleSetLeavesItems = AddToggleOption("Set Leaves Existing Items Equipped", bndg_SkseFunctions.GetSetLeavesItems(selectedSlot))
+    inputEnterSetName = AddInputOption("Set Name", StorageUtil.GetStringValue(thePlayer, gearsData.STORAGE_KEY_SET_NAME + selectedSlot, "")) ;bndg_SkseFunctions.GetSetName(selectedSlot))    
+    toggleSetLeavesItems = AddToggleOption("Set Leaves Existing Items Equipped", StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS + selectedSlot, 0)) ;, bndg_SkseFunctions.GetSetLeavesItems(selectedSlot))
     AddTextOption("", "")
 
-    AddHeaderOption("Weapons / Ammo")
-    AddHeaderOption("")
 
-    Form storedWeapon1 = bndg_SkseFunctions.GetWeapon(selectedSlot, true)
-    Form storedWeapon2 = bndg_SkseFunctions.GetWeapon(selectedSlot, false)
-    Form storedAmmo = bndg_SkseFunctions.GetAmmo(selectedSlot)
 
-    string storedWeapon1Name = ""
-    string storedWeapon2Name = ""
-    string storedAmmoName = ""
+    ; AddHeaderOption("Spells / Shout")
+    ; AddHeaderOption("")
 
-    if storedWeapon1 != none
-        storedWeapon1Name = storedWeapon1.GetName()
-    endif
-    if storedWeapon2 != none
-        storedWeapon2Name = storedWeapon2.GetName()
-    endif
-    if storedAmmo != none
-        storedAmmoName = storedAmmo.GetName()
-    endif
+    ; Spell leftHandSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 1) 
+    ; Spell rightHandSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 2)
+    ; Shout shoutSpell = bndg_SkseFunctions.GetShout(selectedSlot)
+    ; Spell otherSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 3)
 
-    toggleClearPrimaryWeapon = AddTextOption("Primary Weapon", storedWeapon1Name)
-    toggleClearOffhandWeapon = AddTextOption("Offhand Weapon", storedWeapon2Name)
-    toggleClearAmmo = AddTextOption("Ammo", storedAmmoName)
-    AddTextOption("", "")
+    ; string lSpellName = ""
+    ; string rSpellName = ""
+    ; string shoutName = ""
+    ; if leftHandSpell != none
+    ;     lSpellName = leftHandSpell.GetName()
+    ; endif
+    ; if rightHandSpell != none
+    ;     rSpellName = rightHandSpell.GetName()
+    ; endif
+    ; if shoutSpell != none
+    ;     shoutName = shoutSpell.GetName()
+    ; endif
+    ; if otherSpell != none
+    ;     shoutName = otherSpell.GetName()
+    ; endif
 
-    AddHeaderOption("Spells / Shout")
-    AddHeaderOption("")
-
-    Spell leftHandSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 1) 
-    Spell rightHandSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 2)
-    Shout shoutSpell = bndg_SkseFunctions.GetShout(selectedSlot)
-    Spell otherSpell = bndg_SkseFunctions.GetSpell(selectedSlot, 3)
-
-    string lSpellName = ""
-    string rSpellName = ""
-    string shoutName = ""
-    if leftHandSpell != none
-        lSpellName = leftHandSpell.GetName()
-    endif
-    if rightHandSpell != none
-        rSpellName = rightHandSpell.GetName()
-    endif
-    if shoutSpell != none
-        shoutName = shoutSpell.GetName()
-    endif
-    if otherSpell != none
-        shoutName = otherSpell.GetName()
-    endif
-
-    toggleClearLeftHandSpell = AddTextOption("Left Hand Spell", lSpellName)
-    toggleClearRightHandSpell = AddTextOption("Right Hand Spell", rSpellName)
-    toggleClearShout = AddTextOption("Shout/Voice Spell", shoutName)
-    AddTextOption("", "")
+    ; toggleClearLeftHandSpell = AddTextOption("Left Hand Spell", lSpellName)
+    ; toggleClearRightHandSpell = AddTextOption("Right Hand Spell", rSpellName)
+    ; toggleClearShout = AddTextOption("Shout/Voice Spell", shoutName)
+    ; AddTextOption("", "")
 
     AddHeaderOption("Items In Set")
     AddHeaderOption("")
 
-    Form[] items = bndg_SkseFunctions.GetSetItems(selectedSlot)
+    Form[] items = StorageUtil.FormListToArray(thePlayer, gearsData.STORAGE_KEY_GEAR + selectedSlot) ; bndg_SkseFunctions.GetSetItems(selectedSlot)
 
     bndg_BindingGearManager.WriteToConsole("DisplaySlot items: " + items)
 
@@ -215,7 +197,7 @@ function DisplaySlot(int slot)
         idx = 0
         while idx < items.Length
             Form item = items[idx]
-            toggleClearItem[idx] = AddTextOption(item.GetName(), "")
+            toggleClearItem[idx] = AddTextOption("", item.GetName())
             idx += 1
         endwhile
     endif
@@ -224,8 +206,50 @@ function DisplaySlot(int slot)
         AddTextOption("", "")
     endif
 
+    AddHeaderOption("Weapons / Spells")
+    AddHeaderOption("")
+
+    Form storedLeft = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot) ;bndg_SkseFunctions.GetWeapon(selectedSlot, true)
+    Form storedRight = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + selectedSlot) ;bndg_SkseFunctions.GetWeapon(selectedSlot, false)
+    Form storedAmmo = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_AMMO + selectedSlot) ;bndg_SkseFunctions.GetAmmo(selectedSlot)
+    Form storedVoice = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + selectedSlot)
+
+    string storedLeftName = ""
+    string storedRightName = ""
+    string storedAmmoName = ""
+    string storedVoiceName = ""
+
+    if storedLeft != none
+        storedLeftName = storedLeft.GetName()
+    endif
+    if storedRight != none
+        storedRightName = storedRight.GetName()
+    endif
+    if storedAmmo != none
+        storedAmmoName = storedAmmo.GetName()
+    endif
+    if storedVoice != none
+        storedVoiceName = storedVoice.GetName()
+    endif
+
+    AddTextOption("Left Hand Weapon / Spell", "")
+    AddTextOption("Right Hand Weapon / Spell", "")
+    toggleClearLeftHandWeapon = AddTextOption("", storedLeftName)
+    toggleClearRightHandWeapon = AddTextOption("", storedRightName)
+    AddTextOption("Ammo", "")
+    AddTextOption("Voice spell / Shout", "")
+    toggleClearAmmo = AddTextOption("", storedAmmoName)
+    toggleClearShout = AddTextOption("", storedVoiceName)
+
+
+
+
+    AddTextOption("", "")
+    AddTextOption("", "")
+
     AddHeaderOption("Learn From Equipped Gear")
     AddHeaderOption("")
+
     Form[] inventory = bndg_SkseFunctions.GetWornGear()
     ;debug.MessageBox(inventory)
     idx = 0
@@ -244,7 +268,7 @@ function DisplaySlot(int slot)
         if thePlayer.IsEquipped(item) && item.IsPlayable()
             equippedCount += 1
             ;bndg_BindingGearManager.WriteToConsole("equipped item: " + item)
-            toggleLearnItem[idx] = AddTextOption(item.GetName(), "")
+            toggleLearnItem[idx] = AddTextOption("", item.GetName())
         endif
         idx += 1
     endwhile
@@ -253,64 +277,83 @@ function DisplaySlot(int slot)
         AddTextOption("", "")
     endif
 
-    AddHeaderOption("Learn From Equipped Weapons / Ammo")
+    AddHeaderOption("Learn From Equipped Weapons / Spells")
     AddHeaderOption("")
-    Form eqWeapon1 = thePlayer.GetEquippedWeapon(false)
-    Form eqWeapon2 = thePlayer.GetEquippedWeapon(true)
-    Form eqAmmo = bndg_SkseFunctions.GetEquippedAmmo(thePlayer)
+    Form eqWeapon1 = bndg_SkseFunctions.GetEquippedRightHand() ;thePlayer.GetEquippedWeapon(false)
+    Form eqWeapon2 = bndg_SkseFunctions.GetEquippedLeftHand() ;thePlayer.GetEquippedWeapon(true)
+    Form eqAmmo = bndg_SkseFunctions.GetEquippedAmmo() ;.GetEquippedAmmo(thePlayer)
+    Form eqVoice = bndg_SkseFunctions.GetEquippedVoice()
 
-    string eqWeapon1Name = ""
-    string eqWeapon2Name = ""
+    string eqRigthHandName = ""
+    string eqLeftHandName = ""
     string eqAmmoName = ""
+    string eqVoiceName = ""
 
     if eqWeapon1 != none
-        eqWeapon1Name = eqWeapon1.GetName()
+        eqRigthHandName = eqWeapon1.GetName()
     endif
     if eqWeapon2 != none
-        eqWeapon2Name = eqWeapon2.GetName()
+        eqLeftHandName = eqWeapon2.GetName()
     endif
     if eqAmmo != none
         eqAmmoName = eqAmmo.GetName()
     endif
-
-    toggleLearnPrimaryWeapon = AddTextOption("Primary Weapon", eqWeapon1Name)
-    toggleLearnOffhandWeapon = AddTextOption("Offhand Weapon", eqWeapon2Name)
-    toggleLearnAmmo = AddTextOption("Ammo", eqAmmoName)
-    AddTextOption("", "")
-
-
-    AddHeaderOption("Learn From Equipped Spells / Shout")
-    AddHeaderOption("")
-    Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
-    Spell eqSpellRight = thePlayer.GetEquippedSpell(1)
-
-    string eqLeftSpellName = ""
-    string eqRightSpellName = ""
-
-    if eqSpellLeft != none
-        eqLeftSpellName = eqSpellLeft.GetName()
+    if eqVoice != none
+        eqVoiceName = eqVoice.GetName()
     endif
 
-    if eqSpellRight != none
-        eqRightSpellName = eqSpellRight.GetName()
-    endif
+    ; string eqShoutName = ""
+    ; Shout eqShout = thePlayer.GetEquippedShout()
+    ; Spell eqSpellOther = thePlayer.GetEquippedSpell(2)
+    ; if eqShout
+    ;     eqShoutName = eqShout.GetName()
+    ; endif
+    ; if eqSpellOther
+    ;     eqShoutName = eqSpellOther.GetName()
+    ; endif
 
-    string eqShoutName = ""
-    Shout eqShout = thePlayer.GetEquippedShout()
-    Spell eqSpellOther = thePlayer.GetEquippedSpell(2)
-    if eqShout
-        eqShoutName = eqShout.GetName()
-    endif
-    if eqSpellOther
-        eqShoutName = eqSpellOther.GetName()
-    endif
+    AddTextOption("Left Hand Weapon / Spell", "")
+    AddTextOption("Right Hand Weapon / Spell", "")
+    toggleLearnLeftHandWeapon = AddTextOption("", eqLeftHandName)
+    toggleLearnRightHandWeapon = AddTextOption("", eqRigthHandName)
+    AddTextOption("Ammo", "")
+    AddTextOption("Voice spell / Shout", "")
+    toggleLearnAmmo = AddTextOption("", eqAmmoName)
+    toggleLearnShout = AddTextOption("", eqVoiceName)
 
-    bndg_BindingGearManager.WriteToConsole("equipped shout: " + eqShout + " power: " + eqSpellOther)
 
-    toggleLearnLeftHandSpell = AddTextOption("Left Hand Spell", eqLeftSpellName)
-    toggleLearnRightHandSpell = AddTextOption("Right Hand Spell", eqRightSpellName)
-    toggleLearnShout = AddTextOption("Shout", eqShoutName)
-    AddTextOption("", "")
+    ; AddHeaderOption("Learn From Equipped Spells / Shout")
+    ; AddHeaderOption("")
+    ; Spell eqSpellLeft = thePlayer.GetEquippedSpell(0)
+    ; Spell eqSpellRight = thePlayer.GetEquippedSpell(1)
+
+    ; string eqLeftSpellName = ""
+    ; string eqRightSpellName = ""
+
+    ; if eqSpellLeft != none
+    ;     eqLeftSpellName = eqSpellLeft.GetName()
+    ; endif
+
+    ; if eqSpellRight != none
+    ;     eqRightSpellName = eqSpellRight.GetName()
+    ; endif
+
+    ; string eqShoutName = ""
+    ; Shout eqShout = thePlayer.GetEquippedShout()
+    ; Spell eqSpellOther = thePlayer.GetEquippedSpell(2)
+    ; if eqShout
+    ;     eqShoutName = eqShout.GetName()
+    ; endif
+    ; if eqSpellOther
+    ;     eqShoutName = eqSpellOther.GetName()
+    ; endif
+
+    ; bndg_BindingGearManager.WriteToConsole("equipped shout: " + eqShout + " power: " + eqSpellOther)
+
+    ; toggleLearnLeftHandSpell = AddTextOption("Left Hand Spell", eqLeftSpellName)
+    ; toggleLearnRightHandSpell = AddTextOption("Right Hand Spell", eqRightSpellName)
+    ; toggleLearnShout = AddTextOption("Shout", eqShoutName)
+    ; AddTextOption("", "")
 
 endfunction
 
@@ -352,7 +395,8 @@ endfunction
 
 event OnOptionInputAccept(int option, string textStr)
 	if (option == inputEnterSetName)
-        bndg_SkseFunctions.SetSetName(selectedSlot, textStr)
+        StorageUtil.SetStringValue(thePlayer, gearsData.STORAGE_KEY_SET_NAME + selectedSlot, textStr)
+        ;bndg_SkseFunctions.SetSetName(selectedSlot, textStr)
 		SetInputOptionValue(option, textStr)
 	endIf
 endEvent
@@ -362,56 +406,60 @@ event OnOptionSelect(int option)
     bool skipOthers = false
 
     if option == toggleSetLeavesItems
-        int leavesItems = bndg_SkseFunctions.GetSetLeavesItems(selectedSlot)
+        int leavesItems = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS + selectedSlot, 0) ; bndg_SkseFunctions.GetSetLeavesItems(selectedSlot)
         if leavesItems == 1
             leavesItems = 0
         else
             leavesitems = 1
         endif
-        bndg_SkseFunctions.ToggleSetLeavesItems(selectedSlot, leavesItems == 1)
+        StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS + selectedSlot, leavesItems)
+        ;bndg_SkseFunctions.ToggleSetLeavesItems(selectedSlot, leavesItems == 1)
         SetToggleOptionValue(option, leavesItems)
         skipOthers = true        
     endif
 
-    if option == toggleClearLeftHandSpell
-        if ShowMessage("Clear left hand spell? slot -" + selectedSlot, true, "$Yes", "$No")
-            bndg_SkseFunctions.ClearSpell(selectedSlot, 1)
-            ;ShowMessage("Left hand spell cleared", false)
-            ForcePageReset()
-        endif
-        skipOthers = true
-    endif
+    ; if option == toggleClearLeftHandSpell
+    ;     if ShowMessage("Clear left hand spell? slot -" + selectedSlot, true, "$Yes", "$No")
+    ;         bndg_SkseFunctions.ClearSpell(selectedSlot, 1)
+    ;         ;ShowMessage("Left hand spell cleared", false)
+    ;         ForcePageReset()
+    ;     endif
+    ;     skipOthers = true
+    ; endif
 
-    if option == toggleClearRightHandSpell
-        if ShowMessage("Clear right hand spell? slot -" + selectedSlot, true, "$Yes", "$No")
-            bndg_SkseFunctions.ClearSpell(selectedSlot, 2)
-            ;ShowMessage("Right hand spell cleared", false)
-            ForcePageReset()
-        endif
-        skipOthers = true
-    endif
+    ; if option == toggleClearRightHandSpell
+    ;     if ShowMessage("Clear right hand spell? slot -" + selectedSlot, true, "$Yes", "$No")
+    ;         bndg_SkseFunctions.ClearSpell(selectedSlot, 2)
+    ;         ;ShowMessage("Right hand spell cleared", false)
+    ;         ForcePageReset()
+    ;     endif
+    ;     skipOthers = true
+    ; endif
 
     if option == toggleClearShout
-        if ShowMessage("Clear shout? slot -" + selectedSlot, true, "$Yes", "$No")
-            bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
+        if ShowMessage("Clear stored voice?", true, "$Yes", "$No")
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + selectedSlot, none)
+            ;bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
             ;ShowMessage("Shout cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
     endif
 
-    if option == toggleClearPrimaryWeapon
-        if ShowMessage("Clear primary weapon?", true, "$Yes", "$No")
-            bndg_SkseFunctions.ClearWeapon(selectedSlot, true)
+    if option == toggleClearRightHandWeapon
+        if ShowMessage("Clear right hand weapon / spell?", true, "$Yes", "$No")
+            ;bndg_SkseFunctions.ClearWeapon(selectedSlot, true)
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + selectedSlot, none)
             ;ShowMessage("Primary weapon cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
     endif
 
-    if option == toggleClearOffhandWeapon
-        if ShowMessage("Clear offhand weapon?", true, "$Yes", "$No")
-            bndg_SkseFunctions.ClearWeapon(selectedSlot, false)
+    if option == toggleClearLeftHandWeapon
+        if ShowMessage("Clear left hand weapon / spell?", true, "$Yes", "$No")
+            ;bndg_SkseFunctions.ClearWeapon(selectedSlot, false)
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot, none)
             ;ShowMessage("Offhand weapon cleared", false)
             ForcePageReset()
         endif
@@ -420,19 +468,22 @@ event OnOptionSelect(int option)
 
     if option == toggleClearAmmo
         if ShowMessage("Clear ammo?", true, "$Yes", "$No")
-            bndg_SkseFunctions.ClearAmmo(selectedSlot)
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_AMMO + selectedSlot, none)
+            ;bndg_SkseFunctions.ClearAmmo(selectedSlot)
             ;ShowMessage("Ammo cleared", false)
             ForcePageReset()
         endif
         skipOthers = true
     endif
 
-    if option == toggleLearnPrimaryWeapon
-        if thePlayer.GetEquippedWeapon(false) == none
-            ShowMessage("No primary weapon equipped", false)
+    if option == toggleLearnRightHandWeapon
+        Form eqRight = bndg_SkseFunctions.GetEquippedRightHand()
+        if eqRight == none
+            ;ShowMessage("No primary weapon equipped", false)
         else
-            if ShowMessage("Learn primary weapon?", true, "$Yes", "$No")
-                bndg_SkseFunctions.LearnWeapon(selectedSlot, true)
+            if ShowMessage("Learn " + eqRight.GetName() + "?", true, "$Yes", "$No")
+                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + selectedSlot, eqRight)
+                ;bndg_SkseFunctions.LearnWeapon(selectedSlot, true)
                 ;ShowMessage("Primary weapon learned", false)
                 ForcePageReset()
             endif
@@ -440,12 +491,14 @@ event OnOptionSelect(int option)
         skipOthers = true
     endif
 
-    if option == toggleLearnOffhandWeapon
-        if thePlayer.GetEquippedWeapon(false) == none
-            ShowMessage("No offhand weapon equipped", false)
+    if option == toggleLearnLeftHandWeapon
+        Form eqLeft = bndg_SkseFunctions.GetEquippedLeftHand()
+        if eqLeft == none
+            ;ShowMessage("No offhand weapon equipped", false)
         else
-            if ShowMessage("Learn offhand weapon?", true, "$Yes", "$No")
-                bndg_SkseFunctions.LearnWeapon(selectedSlot, false)
+            if ShowMessage("Learn " + eqLeft.GetName() + "?", true, "$Yes", "$No")
+                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot, eqLeft)
+                ;bndg_SkseFunctions.LearnWeapon(selectedSlot, false)
                 ;ShowMessage("Offhand weapon learned", false)
                 ForcePageReset()
             endif
@@ -454,11 +507,13 @@ event OnOptionSelect(int option)
     endif
 
     if option == toggleLearnAmmo
-        if bndg_SkseFunctions.GetEquippedAmmo(thePlayer) == none
-            ShowMessage("No ammo is equipped", false)
+        Form eqAmmo = bndg_SkseFunctions.GetEquippedAmmo()
+        if eqAmmo == none
+            ;ShowMessage("No ammo is equipped", false)
         else
-            if ShowMessage("Learn ammo?", true, "$Yes", "$No")
-                bndg_SkseFunctions.LearnAmmo(selectedSlot)
+            if ShowMessage("Learn " + eqAmmo.GetName() + "?", true, "$Yes", "$No")
+                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_AMMO + selectedSlot, eqAmmo)
+                ;bndg_SkseFunctions.LearnAmmo(selectedSlot)
                 ;ShowMessage("Ammo learned", false)
                 ForcePageReset()
             endif
@@ -466,49 +521,62 @@ event OnOptionSelect(int option)
         skipOthers = true
     endif
 
-    if option == toggleLearnLeftHandSpell
-        if thePlayer.GetEquippedSpell(0) == none
-            ShowMessage("No left hand spell equipped", false)
-        else
-            if ShowMessage("Learn left hand spell?", true, "$Yes", "$No")
-                bndg_SkseFunctions.LearnSpell(selectedSlot, 1, thePlayer.GetEquippedSpell(0))
-                ;ShowMessage("Left hand spell learned", false)
-                ForcePageReset()
-            endif
-        endif
-        skipOthers = true
-    endif
+    ; if option == toggleLearnLeftHandSpell
+    ;     if thePlayer.GetEquippedSpell(0) == none
+    ;         ;ShowMessage("No left hand spell equipped", false)
+    ;     else
+    ;         if ShowMessage("Learn left hand spell?", true, "$Yes", "$No")
+    ;             bndg_SkseFunctions.LearnSpell(selectedSlot, 1, thePlayer.GetEquippedSpell(0))
+    ;             ;ShowMessage("Left hand spell learned", false)
+    ;             ForcePageReset()
+    ;         endif
+    ;     endif
+    ;     skipOthers = true
+    ; endif
 
-    if option == toggleLearnRightHandSpell
-        if thePlayer.GetEquippedSpell(1) == none
-            ShowMessage("No right hand spell equipped", false)
-        else
-            if ShowMessage("Learn right hand spell?", true, "$Yes", "$No")
-                bndg_SkseFunctions.LearnSpell(selectedSlot, 2, thePlayer.GetEquippedSpell(1))
-                ;ShowMessage("Right hand spell learned", false)
-                ForcePageReset()
-            endif
-        endif
-        skipOthers = true
-    endif
+    ; if option == toggleLearnRightHandSpell
+    ;     if thePlayer.GetEquippedSpell(1) == none
+    ;         ShowMessage("No right hand spell equipped", false)
+    ;     else
+    ;         if ShowMessage("Learn right hand spell?", true, "$Yes", "$No")
+    ;             bndg_SkseFunctions.LearnSpell(selectedSlot, 2, thePlayer.GetEquippedSpell(1))
+    ;             ;ShowMessage("Right hand spell learned", false)
+    ;             ForcePageReset()
+    ;         endif
+    ;     endif
+    ;     skipOthers = true
+    ; endif
 
     if option == toggleLearnShout
-        if thePlayer.GetEquippedSpell(2) == none && thePlayer.GetEquippedShout() == none
-            ShowMessage("No shout or voice spell equipped", false)
+        Form eqVoice = bndg_SkseFunctions.GetEquippedVoice()
+        if eqVoice == none
+            ;ShowMessage("No ammo is equipped", false)
         else
-            if ShowMessage("Learn shout / voice spell?", true, "$Yes", "$No")
-                if thePlayer.GetEquippedSpell(2) != none
-                    bndg_SkseFunctions.LearnSpell(selectedSlot, 3, thePlayer.GetEquippedSpell(2))
-                    bndg_SkseFunctions.ClearShout(selectedSlot)
-                else
-                    bndg_SkseFunctions.LearnShout(selectedSlot, thePlayer.GetEquippedShout())
-                    bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
-                endif
-                ;ShowMessage("Shout / voice spell learned", false)
+            if ShowMessage("Learn " + eqVoice.GetName() + "?", true, "$Yes", "$No")
+                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + selectedSlot, eqVoice)
+                ;bndg_SkseFunctions.LearnAmmo(selectedSlot)
+                ;ShowMessage("Ammo learned", false)
                 ForcePageReset()
             endif
         endif
         skipOthers = true
+
+        ; if thePlayer.GetEquippedSpell(2) == none && thePlayer.GetEquippedShout() == none
+        ;     ;ShowMessage("No shout or voice spell equipped", false)
+        ; else
+        ;     if ShowMessage("Learn shout / voice spell?", true, "$Yes", "$No")
+        ;         if thePlayer.GetEquippedSpell(2) != none
+        ;             bndg_SkseFunctions.LearnSpell(selectedSlot, 3, thePlayer.GetEquippedSpell(2))
+        ;             bndg_SkseFunctions.ClearShout(selectedSlot)
+        ;         else
+        ;             bndg_SkseFunctions.LearnShout(selectedSlot, thePlayer.GetEquippedShout())
+        ;             bndg_SkseFunctions.ClearSpell(selectedSlot, 3)
+        ;         endif
+        ;         ;ShowMessage("Shout / voice spell learned", false)
+        ;         ForcePageReset()
+        ;     endif
+        ; endif
+        ; skipOthers = true
     endif
 
     if option == toggleUseAnimation
@@ -549,8 +617,16 @@ event OnOptionSelect(int option)
     if option == toggleLearnSlot && !working && !skipOthers
         working = true
         if ShowMessage("Use worn items to build this slot?", true, "$Yes", "$No")
+            
+            Form[] wornItems = bndg_SkseFunctions.GetWornGear();
+            StorageUtil.FormListCopy(thePlayer, gearsData.STORAGE_KEY_GEAR + selectedSlot, wornItems)
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + selectedSlot, bndg_SkseFunctions.GetEquippedRightHand())
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot, bndg_SkseFunctions.GetEquippedLeftHand())
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_AMMO + selectedSlot, bndg_SkseFunctions.GetEquippedAmmo())
+            StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + selectedSlot, bndg_SkseFunctions.GetEquippedVoice())
+
             ;LearnWornGear()
-            bndg_SkseFunctions.LearnWornGear(selectedSlot);
+            ;bndg_SkseFunctions.LearnWornGear(selectedSlot);
             ;ShowMessage("Worn items learned", false)
             ForcePageReset()
             skipOthers = true
@@ -583,12 +659,13 @@ event OnOptionSelect(int option)
     if !working && !skipOthers
         working = true
         idx = 0
-        Form[] items = bndg_SkseFunctions.GetSetItems(selectedSlot)
+        Form[] items = StorageUtil.FormListToArray(thePlayer, gearsData.STORAGE_KEY_GEAR + selectedSlot) ;bndg_SkseFunctions.GetSetItems(selectedSlot)
         while idx < items.Length
             if option == toggleClearItem[idx]
                 Form selectedItem = items[idx] ;JsonUtil.FormListGet(gearsData.JsonFileName, "binding_gear_items_" + selectedSlot, idx)
                 if ShowMessage("Remove " + selectedItem.GetName() + " from set?", true, "$Yes", "$No")
-                    bndg_SkseFunctions.RemoveSetItem(selectedSlot, selectedItem)
+                    StorageUtil.FormListRemove(thePlayer, gearsData.STORAGE_KEY_GEAR + selectedSlot, selectedItem, true) ;remove all
+                    ;bndg_SkseFunctions.RemoveSetItem(selectedSlot, selectedItem)
                     ;ShowMessage("Item removed from set", false)
                     ForcePageReset()
                     skipOthers = true
@@ -608,7 +685,8 @@ event OnOptionSelect(int option)
             if option == toggleLearnItem[idx]
                 Form selectedItem = items[idx]
                 if ShowMessage("Learn " + selectedItem.GetName() + " from set?", true, "$Yes", "$No")
-                    bndg_SkseFunctions.AddSetItem(selectedSlot, selectedItem)
+                    StorageUtil.FormListAdd(thePlayer, gearsData.STORAGE_KEY_GEAR + selectedSlot, selectedItem, false) ;no duplicates
+                    ;bndg_SkseFunctions.AddSetItem(selectedSlot, selectedItem)
                     ;ShowMessage("Item added to set", false)
                     ForcePageReset()
                     skipOthers = true
@@ -647,7 +725,10 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
             ; endif
             ;main.SetWheelMenuHotKey(keyCode)
             ;RegisterForKey(keyCode)
-            bndg_SkseFunctions.LearnHotKey(0, keyCode, 0)
+            StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + "0", keyCode)
+            ;StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + "0", 0)
+            bndg_SkseFunctions.SetHotkey(0, keyCode, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + "0"))
+            ;bndg_SkseFunctions.LearnHotKey(0, keyCode, 0)
             SetKeyMapOptionValue(wheelMenuKeymapOption, keyCode)
         endif
 
@@ -657,11 +738,14 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
                 ; if main.GetHotkey(idx) > 0
                 ;     ;UnregisterForKey(main.GetHotkey(idx))
                 ; endif
-                int hkm = bndg_SkseFunctions.GetModifier(idx)
-                bndg_SkseFunctions.LearnHotKey(idx, keyCode, hkm)
+                ;int hkm = bndg_SkseFunctions.GetModifier(idx)
+                ;bndg_SkseFunctions.LearnHotKey(idx, keyCode, hkm)
                 ;Debug.MessageBox(keyCode)
                 ;main.SetHotkey(idx, keyCode)
                 ;RegisterForKey(keyCode)
+                StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + idx, keyCode)
+                StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + idx, 0)
+                bndg_SkseFunctions.SetHotkey(idx, keyCode, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + idx))
                 SetKeyMapOptionValue(keymapOption[idx], keyCode)
             endif
             idx += 1

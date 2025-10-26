@@ -17,7 +17,7 @@ function ClearShout(int slot) global native
 function ClearSpell(int slot, int spellSlot) global native
 Shout function GetShout(int slot) global native
 Spell function GetSpell(int slot, int spellSlot) global native
-function Dress(int slot) global native
+;function Dress(int slot) global native
 int function GetSetLeavesItems(int slot) global native
 function ToggleSetLeavesItems(int slot, bool leavesItems) global native
 int function GetShowAnimations() global native
@@ -26,13 +26,27 @@ function LearnWeapon(int slot, bool mainHand) global native
 function LearnAmmo(int slot) global native
 Form function GetWeapon(int slot, bool mainHand) global native
 Form function GetAmmo(int slot) global native
-Form function GetEquippedAmmo(Actor act) global native
 function ClearWeapon(int slot, bool mainHand) global native
 function ClearAmmo(int slot) global native
 
-int function DisplayWheelMenuBridge(int[] slots, string[] setNames) global
+function DressActorWithItems(Actor act, Form[] items, Form leftHand, Form rightHand, Form ammo, Form voice, bool leavesItems) global native
+Form function GetEquippedLeftHand() global native
+Form function GetEquippedRightHand() global native
+Form function GetEquippedAmmo() global native
+Form function GetEquippedVoice() global native
+function SetHotkey(int slot, int keycode, int modifier) global native
+function SetShowAnimations(int value) global native ;0 - off, 1 - on
+
+int function DisplayWheelMenuBridge() global ;int[] slots, string[] setNames) global
     bndg_BindingGearManager gear = Quest.GetQuest("bndg_BindingGearManagerQuest") as bndg_BindingGearManager
     ;debug.MessageBox(setNames)
-    gear.ShowWheelMenu(slots, setNames)
+    gear.ShowWheelMenu() ;(slots, setNames)
+    return 0
+endfunction
+
+int function EquipSetBridge(int slot) global
+    ;debug.MessageBox("slot: " + slot)
+    bndg_BindingGearManager gear = Quest.GetQuest("bndg_BindingGearManagerQuest") as bndg_BindingGearManager
+    gear.EquipSet(slot)
     return 0
 endfunction
