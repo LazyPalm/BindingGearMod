@@ -73,7 +73,7 @@ endevent
 
 event OnPageReset(string page)
 
-    version = "0.8"
+    version = "0.81"
 
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)
@@ -606,7 +606,9 @@ event OnOptionSelect(int option)
         int hkm = bndg_SkseFunctions.GetModifier(0)
         int newModifier = AdvanceModifierValue(hkm)
 
-        bndg_SkseFunctions.LearnHotKey(0, hk, newModifier)
+        StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + "0", newModifier)
+        bndg_SkseFunctions.SetHotkey(0, hk, newModifier)
+        ;bndg_SkseFunctions.LearnHotKey(0, hk, newModifier)
         ; int currentModifier = main.GetWheelMenuModifier()
         ; int newModifier = AdvanceModifierValue(currentModifier)
         ; main.SetWheelMenuModifier(newModifier)
@@ -642,8 +644,11 @@ event OnOptionSelect(int option)
                 int hk = bndg_SkseFunctions.GetHotkey(idx)
                 int hkm = bndg_SkseFunctions.GetModifier(idx)
                 int newModifier = AdvanceModifierValue(hkm)
+                
+                StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + idx, newModifier)
+                bndg_SkseFunctions.SetHotkey(idx, hk, newModifier)
                 ;debug.MessageBox("idx: " + idx + " hk:" + hk + " hkm: " + hkm + " new: " + newModifier)
-                bndg_SkseFunctions.LearnHotKey(idx, hk, newModifier)
+                ;bndg_SkseFunctions.LearnHotKey(idx, hk, newModifier)
                 ; int currentModifier = main.GetModifierKey(idx)
                 ; int newModifier = AdvanceModifierValue(currentModifier)
                 ; main.SetModifierKey(idx, newModifier)
