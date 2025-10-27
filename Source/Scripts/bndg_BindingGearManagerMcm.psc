@@ -73,7 +73,7 @@ endevent
 
 event OnPageReset(string page)
 
-    version = "0.81"
+    version = "0.82"
 
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)
@@ -284,6 +284,8 @@ function DisplaySlot(int slot)
     Form eqAmmo = bndg_SkseFunctions.GetEquippedAmmo() ;.GetEquippedAmmo(thePlayer)
     Form eqVoice = bndg_SkseFunctions.GetEquippedVoice()
 
+    int count = 0
+
     string eqRigthHandName = ""
     string eqLeftHandName = ""
     string eqAmmoName = ""
@@ -291,6 +293,7 @@ function DisplaySlot(int slot)
 
     if eqWeapon1 != none
         eqRigthHandName = eqWeapon1.GetName()
+        count = bndg_SkseFunctions.IsTwoHanded(eqWeapon1 as Weapon)
     endif
     if eqWeapon2 != none
         eqLeftHandName = eqWeapon2.GetName()
@@ -314,7 +317,11 @@ function DisplaySlot(int slot)
 
     AddTextOption("Left Hand Weapon / Spell", "")
     AddTextOption("Right Hand Weapon / Spell", "")
-    toggleLearnLeftHandWeapon = AddTextOption("", eqLeftHandName)
+    if count == 2 
+        AddTextOption("", "")
+    else
+        toggleLearnLeftHandWeapon = AddTextOption("", eqLeftHandName)
+    endif
     toggleLearnRightHandWeapon = AddTextOption("", eqRigthHandName)
     AddTextOption("Ammo", "")
     AddTextOption("Voice spell / Shout", "")
@@ -478,11 +485,18 @@ event OnOptionSelect(int option)
 
     if option == toggleLearnRightHandWeapon
         Form eqRight = bndg_SkseFunctions.GetEquippedRightHand()
+        ; int count = bndg_SkseFunctions.IsTwoHanded(eqRight as Weapon)
+        ; ShowMessage("is two handed: " + count, false)
         if eqRight == none
             ;ShowMessage("No primary weapon equipped", false)
         else
             if ShowMessage("Learn " + eqRight.GetName() + "?", true, "$Yes", "$No")
-                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + selectedSlot, eqRight)
+                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_RIGHT_HAND + selectedSlot, bndg_SkseFunctions.GetEquippedRightHand())
+                Form w = bndg_SkseFunctions.GetEquippedRightHand()
+                if bndg_SkseFunctions.IsTwoHanded(w as Weapon) == 2
+                    StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot, none)
+                endif
+                
                 ;bndg_SkseFunctions.LearnWeapon(selectedSlot, true)
                 ;ShowMessage("Primary weapon learned", false)
                 ForcePageReset()
@@ -493,11 +507,13 @@ event OnOptionSelect(int option)
 
     if option == toggleLearnLeftHandWeapon
         Form eqLeft = bndg_SkseFunctions.GetEquippedLeftHand()
+        ; int count = bndg_SkseFunctions.IsTwoHanded(eqLeft as Weapon)
+        ; ShowMessage("is two handed: " + count, false)
         if eqLeft == none
             ;ShowMessage("No offhand weapon equipped", false)
         else
             if ShowMessage("Learn " + eqLeft.GetName() + "?", true, "$Yes", "$No")
-                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot, eqLeft)
+                StorageUtil.SetFormValue(thePlayer, gearsData.STORAGE_KEY_LEFT_HAND + selectedSlot, bndg_SkseFunctions.GetEquippedLeftHand())
                 ;bndg_SkseFunctions.LearnWeapon(selectedSlot, false)
                 ;ShowMessage("Offhand weapon learned", false)
                 ForcePageReset()

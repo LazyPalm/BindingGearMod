@@ -36,6 +36,7 @@ Form function GetEquippedAmmo() global native
 Form function GetEquippedVoice() global native
 function SetHotkey(int slot, int keycode, int modifier) global native
 function SetShowAnimations(int value) global native ;0 - off, 1 - on
+int function IsTwoHanded(Weapon item) global native ;takes a weapon
 
 int function DisplayWheelMenuBridge() global ;int[] slots, string[] setNames) global
     bndg_BindingGearManager gear = Quest.GetQuest("bndg_BindingGearManagerQuest") as bndg_BindingGearManager
