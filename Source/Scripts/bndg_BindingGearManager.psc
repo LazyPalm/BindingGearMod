@@ -2,6 +2,8 @@ Scriptname bndg_BindingGearManager extends Quest
 
 Actor thePlayer
 
+;testing?
+
 bool dhlpActive
 
 int gender
