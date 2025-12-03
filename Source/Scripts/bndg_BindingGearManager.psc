@@ -17,16 +17,25 @@ int keyCodeRightShift = 54
 
 event OnInit()
 
-    thePlayer = Game.GetPlayer()
-
-    RegisterForModEvent("dhlp-Suspend", "OnDhlpSuspend")
-    RegisterForModEvent("dhlp-Resume", "OnDhlpResume") 
-
-    GameLoaded()
+    if self.IsRunning()
+        GameLoaded()
+    endif
 
 endevent
 
 function GameLoaded()
+
+    debug.Notification("Binding Gears loading...")
+
+    thePlayer = Game.GetPlayer()
+
+    if !thePlayer.HasSpell(bndg_WheelMenuSpell)
+        thePlayer.AddSpell(bndg_WheelMenuSpell)
+    endif
+
+    RegisterForModEvent("dhlp-Suspend", "OnDhlpSuspend")
+    RegisterForModEvent("dhlp-Resume", "OnDhlpResume") 
+
     gender = thePlayer.GetLeveledActorBase().GetSex()
     gearsData.GameLoaded()
 
@@ -35,6 +44,8 @@ function GameLoaded()
         bndg_SkseFunctions.SetHotkey(i, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + i), StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + i))
         i += 1
     endwhile
+
+    bndg_SkseFunctions.ToggleAnimations(StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_ANIMATIONS, 0))
 
 endfunction
 
@@ -53,11 +64,40 @@ endfunction
 
 state DhlpState
 
+    function EquipSet(int slot) 
+        MiscUtil.PrintConsole("[BNDG]: EquipSet blocked due to DHLP active")
+    endfunction
+    
+    function ShowWheelMenu()
+        MiscUtil.PrintConsole("[BNDG]: ShowWheelMenu blocked due to DHLP active")
+    endfunction
+
+endstate
+
+state ModIsBusy
+
+    function EquipSet(int slot) 
+        MiscUtil.PrintConsole("[BNDG]: EquipSet blocked due to ModIsBusy active")
+    endfunction
+    
+    function ShowWheelMenu()
+        MiscUtil.PrintConsole("[BNDG]: ShowWheelMenu blocked due to ModIsBusy active")
+    endfunction
+
 endstate
 
 bool showingWheel = false
 
 function EquipSet(int slot) 
+
+    if !SafeProcess()
+        MiscUtil.PrintConsole("[BNDG]: EquipSet blocked due to UI open")
+        return
+    endif
+
+    GoToState("ModIsBusy")
+
+    ;debug.MessageBox("in EquipSet???")
 
     int s = slot ; + 1
 
@@ -68,15 +108,28 @@ function EquipSet(int slot)
     Form storedVoice = StorageUtil.GetFormValue(thePlayer, gearsData.STORAGE_KEY_VOICE + s)
     int storedLeaves = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_LEAVES_ITEMS + s)
 
-    ;debug.MessageBox(storedLeaves)
+    ;debug.MessageBox(items)
 
     Debug.Notification("Equipping outfit " + StorageUtil.GetStringValue(thePlayer, gearsData.STORAGE_KEY_SET_NAME + s, "" + s))
 
     bndg_SkseFunctions.DressActorWithItems(thePlayer, items, storedLeftHand, storedRightHand, storedAmmo, storedVoice, (storedLeaves == 1));
 
+    ;Utility.Wait(10.0)
+
+    GoToState("")
+
 endfunction
 
 function ShowWheelMenu() ;int[] slots, string[] setNames)
+
+    if !SafeProcess()
+        MiscUtil.PrintConsole("[BNDG]: ShowWheelMenu blocked due to UI open")
+        return
+    endif
+
+    GoToState("ModIsBusy")
+
+    ;debug.MessageBox("show wheel??")
 
     int idx
 
@@ -126,11 +179,16 @@ function ShowWheelMenu() ;int[] slots, string[] setNames)
         showingWheel = false
     endif
 
+    GoToState("")
+
 endfunction
 
 event OnDhlpSuspend(string eventName, string strArg, float numArg, Form sender)
     bndg_BindingGearManager.WriteToConsole("OnDhlpSuspend sender: " + sender.GetName() + " id: " + sender.GetFormID())
-    GoToState("DhlpState")
+    int dhlpFlag = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, 0)
+    if dhlpFlag == 1
+        GoToState("DhlpState")
+    endif
     dhlpActive = true
 endevent
 
@@ -140,4 +198,36 @@ event OnDhlpResume(string eventName, string strArg, float numArg, Form sender)
     dhlpActive = false
 endevent
 
+bool function GetDhlpActive()
+    return dhlpActive
+endfunction
+
+function ClearDhlpActive()
+    dhlpActive = false
+endfunction
+
+Bool function SafeProcess()
+    ;this code provided by IsharaMeradin on nexus
+	If (!Utility.IsInMenuMode()) \
+	&& (!UI.IsMenuOpen("Dialogue Menu")) \
+	&& (!UI.IsMenuOpen("Console")) \
+	&& (!UI.IsMenuOpen("Crafting Menu")) \
+	&& (!UI.IsMenuOpen("MessageBoxMenu")) \
+	&& (!UI.IsMenuOpen("ContainerMenu")) \
+	&& (!UI.IsTextInputEnabled())
+		;IsInMenuMode to block when game is paused with menus open
+		;Dialogue Menu check to block when dialog is open
+		;Console check to block when console is open - console does not trigger IsInMenuMode and thus needs its own check
+		;Crafting Menu check to block when crafting menus are open - game is not paused so IsInMenuMode does not work
+		;MessageBoxMenu check to block when message boxes are open - while they pause the game, they do not trigger IsInMenuMode
+		;ContainerMenu check to block when containers are accessed - while they pause the game, they do not trigger IsInMenuMode
+		;IsTextInputEnabled check to block when editable text fields are open
+		Return True
+	Else
+		Return False
+	EndIf
+endfunction
+
 bndg_Data property gearsData auto
+
+Spell property bndg_WheelMenuSpell auto

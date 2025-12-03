@@ -3,11 +3,11 @@ Scriptname bndg_ThePlayerAlias extends ReferenceAlias
 Actor thePlayer
 
 event OnInit()
-    thePlayer = Game.GetPlayer()
+    ;thePlayer = Game.GetPlayer()
 endevent
 
 event OnPlayerLoadGame()
-    thePlayer = Game.GetPlayer()
+    ;thePlayer = Game.GetPlayer()
     main.GameLoaded()
 
 endevent

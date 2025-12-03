@@ -14,6 +14,9 @@ string property STORAGE_KEY_ACTIVE = "gear_active_" autoReadOnly
 string property STORAGE_KEY_KEYCODE = "gear_key_" autoReadOnly 
 string property STORAGE_KEY_MODIFIER = "gear_mod_" autoReadOnly
 
+string property STORAGE_KEY_ANIMATIONS = "gear_anmiations" autoReadOnly
+string property STORAGE_KEY_DHLP_BLOCKED = "gear_dhlp" autoReadOnly
+
 int property SLOT_COUNT = 8 autoReadOnly
 
 function GameLoaded()
