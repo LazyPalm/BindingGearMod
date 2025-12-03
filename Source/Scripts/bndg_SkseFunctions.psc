@@ -6,7 +6,7 @@ Form[] function GetWornGear() global native
 function ToggleAnimations(int toggleOn) global native
 Form function GetWeapon(int slot, bool mainHand) global native
 Form function GetAmmo(int slot) global native
-
+bool function BoundHandsCheck(Actor act) global native
 function DressActorWithItems(Actor act, Form[] items, Form leftHand, Form rightHand, Form ammo, Form voice, bool leavesItems) global native
 Form function GetEquippedLeftHand() global native
 Form function GetEquippedRightHand() global native

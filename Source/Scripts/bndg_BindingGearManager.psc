@@ -29,6 +29,11 @@ function GameLoaded()
 
     thePlayer = Game.GetPlayer()
 
+    int dhlpFlag = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, -1)
+    if dhlpFlag < 0
+        StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, 1) ;default this to ON
+    endif
+
     if !thePlayer.HasSpell(bndg_WheelMenuSpell)
         thePlayer.AddSpell(bndg_WheelMenuSpell)
     endif
@@ -95,6 +100,11 @@ function EquipSet(int slot)
         return
     endif
 
+    if bndg_SkseFunctions.BoundHandsCheck(thePlayer)
+        debug.Notification("Your bound hands prevent this.")
+        return
+    endif
+
     GoToState("ModIsBusy")
 
     ;debug.MessageBox("in EquipSet???")
@@ -124,6 +134,11 @@ function ShowWheelMenu() ;int[] slots, string[] setNames)
 
     if !SafeProcess()
         MiscUtil.PrintConsole("[BNDG]: ShowWheelMenu blocked due to UI open")
+        return
+    endif
+
+    if bndg_SkseFunctions.BoundHandsCheck(thePlayer)
+        debug.Notification("Your bound hands prevent this.")
         return
     endif
 
