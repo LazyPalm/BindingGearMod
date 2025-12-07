@@ -49,12 +49,17 @@ int keyCodeRightAlt = 184
 int keyCodeLeftShift = 42
 int keyCodeRightShift = 54
 
+string backupFolder = "data/skse/plugins/StorageUtilData/binding_gear_backup/"
+
+int clickedBackupSettings
+int clickedRestoreSettings
+
 event OnConfigOpen()
 
     thePlayer = Game.GetPlayer()
     keymapOption = new int[10]
     modifierOption = new int[10]
-    Pages = new string[9]
+    Pages = new string[10]
     toggleClearItem = new int[128]
     toggleLearnItem = new int[128]
     
@@ -66,11 +71,13 @@ event OnConfigOpen()
         idx += 1
     endwhile
 
+    Pages[bndg_BindingGearManager.GetSlotCount() + 1] = "Backup"
+
 endevent
 
 event OnPageReset(string page)
 
-    version = "0.83"
+    version = "0.84"
 
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)
@@ -79,6 +86,8 @@ event OnPageReset(string page)
         DisplayWelcome()
     elseif page == "Settings"
         DisplaySettings()
+    elseif page == "Backup"
+        DisplayBackup()
     Else
         idx = 1
         while idx <= bndg_BindingGearManager.GetSlotCount()
@@ -93,6 +102,19 @@ event OnPageReset(string page)
 
 
 endevent
+
+function DisplayBackup()
+
+    AddHeaderOption("Backup & Restore")
+    AddHeaderOption("")
+
+    clickedBackupSettings = AddTextOption("Backup Hotkeys & Settings", "")
+    clickedRestoreSettings = AddTextOption("Restore Hotkeys & Settings", "")
+
+    ; AddHeaderOption("Sets")
+    ; AddHeaderOption("")
+
+endfunction
 
 function DisplayWelcome()
 
@@ -327,6 +349,25 @@ event OnOptionSelect(int option)
     ;working = false
 
     if option == clickedVersion
+        skipOthers = true
+    endif
+
+    if option == clickedBackupSettings
+        if ShowMessage("Backup settings and hotkeys?")
+            BackupSettingsToJson()
+        endif
+        skipOthers = true
+    endif
+
+    if option == clickedRestoreSettings
+        int exists = JsonUtil.GetIntValue("/binding_gear_backup/settings/settings.json", "backup_exists")
+        if exists == 1
+            if ShowMessage("Restore settings and hotkeys?")
+                RestoreSettingsFromJson()
+            endif
+        else
+            ShowMessage("No backup has been created", false)
+        endif
         skipOthers = true
     endif
 
@@ -611,6 +652,62 @@ event OnOptionKeyMapChange(int option, int keyCode, string conflictControl, stri
     endif
 
 endevent
+
+function BackupSettingsToJson()
+
+    string fileName = "/binding_gear_backup/settings/settings.json"
+
+    JsonUtil.SetIntValue(fileName, gearsData.STORAGE_KEY_ANIMATIONS, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_ANIMATIONS, 0))
+    JsonUtil.SetIntValue(fileName, gearsData.STORAGE_KEY_DHLP_BLOCKED, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, 0))
+
+    idx = 1
+    while idx <= gearsData.SLOT_COUNT
+        JsonUtil.SetIntValue(fileName, gearsData.STORAGE_KEY_KEYCODE + idx, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + idx)) 
+        JsonUtil.SetIntValue(fileName, gearsData.STORAGE_KEY_MODIFIER + idx, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + idx)) 
+
+        idx += 1
+    endwhile
+
+    JsonUtil.SetIntValue(fileName, gearsData.STORAGE_KEY_KEYCODE + "0", StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + "0"))
+    JsonUtil.SetIntValue(fileName, gearsData.STORAGE_KEY_MODIFIER + "0", StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + "0"))
+
+    JsonUtil.SetIntValue(fileName, "backup_exists", 1)
+
+    JsonUtil.Save(fileName)
+
+    ShowMessage("Settings & Hotkeys backup completed")
+
+endfunction
+
+function RestoreSettingsFromJson()
+
+    string fileName = "/binding_gear_backup/settings/settings.json"
+
+    StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_ANIMATIONS, JsonUtil.GetIntValue(fileName, gearsData.STORAGE_KEY_ANIMATIONS))
+    StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, JsonUtil.GetIntValue(fileName, gearsData.STORAGE_KEY_DHLP_BLOCKED))
+
+    idx = 1
+    while idx <= gearsData.SLOT_COUNT
+        StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + idx, JsonUtil.GetIntValue(fileName, gearsData.STORAGE_KEY_KEYCODE + idx))
+        StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + idx, JsonUtil.GetIntValue(fileName, gearsData.STORAGE_KEY_MODIFIER + idx))
+
+        idx += 1
+    endwhile
+
+    StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + "0", JsonUtil.GetIntValue(fileName, gearsData.STORAGE_KEY_KEYCODE + "0"))
+    StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + "0", JsonUtil.GetIntValue(fileName, gearsData.STORAGE_KEY_MODIFIER + "0"))
+
+    int i = 0
+    while i < 9
+        bndg_SkseFunctions.SetHotkey(i, StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_KEYCODE + i), StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_MODIFIER + i))
+        i += 1
+    endwhile
+
+    bndg_SkseFunctions.ToggleAnimations(StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_ANIMATIONS, 0))
+
+    ShowMessage("Settings & Hotkeys backup restored")
+
+endfunction
 
 bndg_BindingGearManager property main auto
 bndg_Data property gearsData auto

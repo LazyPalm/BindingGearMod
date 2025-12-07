@@ -25,7 +25,7 @@ endevent
 
 function GameLoaded()
 
-    ;debug.Notification("Binding Gears loading...")
+    bndg_BindingGearManager.WriteToConsole("Binding Gears loading...")
 
     thePlayer = Game.GetPlayer()
 
