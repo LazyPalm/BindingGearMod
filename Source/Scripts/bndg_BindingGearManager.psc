@@ -100,7 +100,9 @@ function EquipSet(int slot)
         return
     endif
 
-    if bndg_SkseFunctions.BoundHandsCheck(thePlayer)
+    int blockedHands = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_BLOCKED_HANDS, 1)
+
+    if bndg_SkseFunctions.BoundHandsCheck(thePlayer) && blockedHands == 1
         debug.Notification("Your bound hands prevent this.")
         return
     endif
@@ -137,7 +139,9 @@ function ShowWheelMenu() ;int[] slots, string[] setNames)
         return
     endif
 
-    if bndg_SkseFunctions.BoundHandsCheck(thePlayer)
+    int blockedHands = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_BLOCKED_HANDS, 1)
+
+    if bndg_SkseFunctions.BoundHandsCheck(thePlayer) && blockedHands == 1
         debug.Notification("Your bound hands prevent this.")
         return
     endif

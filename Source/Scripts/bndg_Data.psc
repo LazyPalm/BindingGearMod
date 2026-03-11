@@ -16,6 +16,7 @@ string property STORAGE_KEY_MODIFIER = "gear_mod_" autoReadOnly
 
 string property STORAGE_KEY_ANIMATIONS = "gear_anmiations" autoReadOnly
 string property STORAGE_KEY_DHLP_BLOCKED = "gear_dhlp" autoReadOnly
+string property STORAGE_KEY_BLOCKED_HANDS = "gear_blocked_hands" autoReadOnly
 
 int property SLOT_COUNT = 8 autoReadOnly
 

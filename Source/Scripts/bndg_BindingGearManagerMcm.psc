@@ -10,6 +10,7 @@ int idx
 int toggleUseAnimation
 int toggleBlockDuringDHLP
 int toggleDoNotUnequipSpells
+int toggleBlockedHands
 
 int clickedVersion
 int clickedClearDhlp
@@ -77,7 +78,7 @@ endevent
 
 event OnPageReset(string page)
 
-    version = "0.84"
+    version = "0.85"
 
     SetCursorFillMode(LEFT_TO_RIGHT)
     SetCursorPosition(0)
@@ -134,6 +135,8 @@ function DisplaySettings()
     toggleUseAnimation = AddToggleOption("Use Animation", StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_ANIMATIONS, 0))
     ;toggleDoNotUnequipSpells = AddToggleOption("Do Not Unequip Spells/Shouts", 0); main.GetDoNotUnequipSpells())
     toggleBlockDuringDHLP = AddToggleOption("Block During DHLP", StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, 0))
+    toggleBlockedHands = AddToggleOption("Bound Hands Block Changes", StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_BLOCKED_HANDS, 1))
+    AddEmptyOption()
 
     AddHeaderOption("Hotkeys")
     AddHeaderOption("")
@@ -508,6 +511,18 @@ event OnOptionSelect(int option)
             SetToggleOptionValue(option, 0)
         else
             StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_DHLP_BLOCKED, 1)
+            SetToggleOptionValue(option, 1)
+        endif
+        skipOthers = true
+    endif
+
+    if option == toggleBlockedHands && !skipOthers
+        int blockedHands = StorageUtil.GetIntValue(thePlayer, gearsData.STORAGE_KEY_BLOCKED_HANDS, 1)
+        if blockedHands == 1
+            StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_BLOCKED_HANDS, 0)
+            SetToggleOptionValue(option, 0)
+        else
+            StorageUtil.SetIntValue(thePlayer, gearsData.STORAGE_KEY_BLOCKED_HANDS, 1)
             SetToggleOptionValue(option, 1)
         endif
         skipOthers = true
